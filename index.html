@@ -1346,13 +1346,13 @@ const SFX = {
   },
 };
 
-function selectBanner(index) {
+function selectBanner(index, playSound = true) {
   activeBanner = index;
   $("banner-track").style.transform = `translateX(-${index * 100}%)`;
   document.querySelectorAll(".banner-card").forEach((el, i) => el.classList.toggle("active", i === index));
   document.querySelectorAll(".banner-dot").forEach((el, i) => el.classList.toggle("active", i === index));
   $("pity-bar").classList.toggle("sunken", BANNERS[index].id === "sunken");
-  SFX.click();
+  if (playSound) SFX.click();
   saveState();
 }
 
@@ -1390,7 +1390,7 @@ function loadState() {
     if (state.collection) Object.assign(collection, state.collection);
     $("history").innerHTML = "";
     (state.history || []).forEach(h => $("history").appendChild(historyNode(h.rarity, { icon: h.icon, name: h.name }, h.pull)));
-    selectBanner(Math.min(activeBanner, BANNERS.length - 1));
+    selectBanner(Math.min(activeBanner, BANNERS.length - 1), false);
   } catch (e) {}
 }
 
@@ -1841,6 +1841,7 @@ function doReset() {
   updateInvBadge();
   updateCurrency();
   clearInventoryBody();
+  $("inv-stats").textContent = "0 unique · 0 total";
   $("inv-empty").style.display = "block";
   try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
 }
