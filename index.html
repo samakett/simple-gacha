@@ -208,8 +208,8 @@ h1 {
 .stage-multi {
   display: none;
   width: 100%;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
   margin-bottom: 24px;
 }
 .stage-multi.active { display: grid; }
@@ -734,14 +734,14 @@ h1 {
   color: #555;
   font: italic .72rem "Cormorant Garamond", serif;
 }
-.inv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.inv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 .inv-item, .cdx-item {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 5px;
-  padding: 18px 10px 14px;
+  padding: 22px 12px 18px;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--panel);
@@ -1034,11 +1034,11 @@ h1 {
 .odds-pct { font-size: .82rem; }
 .history-pull { font-size: .82rem; }
 .inv-body { font-size: 1rem; }
-.inv-item, .cdx-item { min-height: 140px; }
-.inv-item-icon, .cdx-item-icon { font-size: 2.35rem; }
-.inv-item-name, .cdx-item-name { max-width: 100%; overflow-wrap: anywhere; font-size: .94rem; }
-.inv-item-count { font-size: .82rem; }
-.cdx-check { font-size: .78rem; }
+.inv-item, .cdx-item { min-height: 166px; }
+.inv-item-icon, .cdx-item-icon { font-size: 2.85rem; }
+.inv-item-name, .cdx-item-name { max-width: 100%; overflow-wrap: anywhere; font-size: 1.08rem; }
+.inv-item-count { font-size: .9rem; }
+.cdx-check { font-size: .86rem; }
 .cdx-item.locked .cdx-item-icon { filter: blur(3px) grayscale(.8); }
 .sum-body { font-size: 1rem; }
 .sum-section-title { font-size: .76rem; }
@@ -1047,8 +1047,8 @@ h1 {
 .exp-mini-tag { font-size: .42rem; }
 
 @media (min-width: 520px) {
-  .inv-grid { grid-template-columns: repeat(3, 1fr); }
-  .stage-multi { grid-template-columns: repeat(2, 1fr); }
+  .inv-grid { grid-template-columns: repeat(2, 1fr); }
+  .stage-multi { grid-template-columns: repeat(5, 1fr); }
 }
 
 @media (min-aspect-ratio: 1/1) and (min-width: 600px) {
