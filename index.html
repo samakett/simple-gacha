@@ -1383,7 +1383,7 @@ const RATES = { mythic: .0002, legendary: .02, epic: .08, rare: .20, common: .69
 const BANNERS = [
   { id: "aetheris", name: "Aetheris", shortName: "Aetheris", accent: "#c9a84c", pool: "exclusive", rateUp: null, guaranteeTen: null, rule: "Standard summoning pool with its own 50-pull Legendary pity." },
   { id: "sunken", name: "The Sunken Archive", shortName: "Sunken", accent: "#2dd4bf", pool: "exclusive", rateUp: "The Drowned God", guaranteeTen: null, rule: "Exclusive archive pool. Mythic pulls have a 50% featured chance for The Drowned God." },
-  { id: "clockwork", name: "Clockwork Dominion", shortName: "Clockwork", accent: "#d6a35b", pool: "exclusive", rateUp: null, guaranteeTen: "legendary", rule: "Exclusive dominion pool. Every 10-pull guarantees at least one Legendary-or-better result." },
+  { id: "clockwork", name: "Clockwork Dominion", shortName: "Clockwork", accent: "#d6a35b", pool: "exclusive", rateUp: null, guaranteeTen: "legendary", rule: "Exclusive dominion pool. Every 10-pull guarantees at least one Legendary-or-better result without consuming pity." },
 ];
 
 const ITEMS = {
@@ -2180,7 +2180,6 @@ function rollTenPullResults() {
   for (let i = 0; i < 10; i++) results.push({ rarity: roll(), item: null });
   if (getActiveBanner().guaranteeTen === "legendary" && !results.some(result => RARITY_ORDER[result.rarity] >= RARITY_ORDER.legendary)) {
     results[Math.floor(Math.random() * results.length)].rarity = "legendary";
-    setPity(0);
   }
   results.forEach(result => { result.item = pickItem(result.rarity); });
   return results;
