@@ -1,0 +1,2174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AETHERIS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --common:    #d4d0c8;
+  --rare:      #5eb4ff;
+  --epic:      #c084fc;
+  --legendary: #f97316;
+  --mythic:    #ef4444;
+  --gold:      #c9a84c;
+  --bg:        #07070f;
+  --panel:     #0f0f1a;
+  --panel2:    #141422;
+  --border:    #1e1e30;
+  --border2:   #2a2a40;
+  --teal:      #2dd4bf;
+  --teal2:     #0d9488;
+  --text:      #b8b4a8;
+  --text-hi:   #ede8d8;
+}
+
+html {
+  height: 100%;
+  background: var(--bg);
+  color-scheme: dark;
+}
+
+body {
+  min-height: 100%;
+  padding: 32px 16px 64px;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg);
+  color: var(--text);
+  color-scheme: dark;
+  font-family: "Cinzel", serif;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: #07070f;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(100,60,200,.12) 0%, transparent 60%),
+    radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,.22) 0%, transparent 100%),
+    radial-gradient(1px 1px at 28% 72%, rgba(255,255,255,.14) 0%, transparent 100%),
+    radial-gradient(1px 1px at 44% 35%, rgba(255,255,255,.18) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 55%, rgba(255,255,255,.10) 0%, transparent 100%),
+    radial-gradient(1px 1px at 72% 22%, rgba(255,255,255,.16) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 65%, rgba(255,255,255,.12) 0%, transparent 100%),
+    radial-gradient(1px 1px at 92% 40%, rgba(255,255,255,.08) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 20% 90%, rgba(255,255,255,.10) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 55% 85%, rgba(255,255,255,.08) 0%, transparent 100%);
+}
+
+.wrap { position: relative; z-index: 1; width: 100%; max-width: 480px; }
+
+.portrait-header { margin-bottom: 28px; text-align: center; }
+.title-ornament {
+  margin-bottom: 6px;
+  color: #a8885a;
+  font-size: .7rem;
+  letter-spacing: .5em;
+  text-transform: uppercase;
+}
+h1 {
+  margin-bottom: 4px;
+  color: var(--text-hi);
+  font: 700 clamp(1.8rem, 7vw, 2.8rem)/1 "Cinzel Decorative", cursive;
+  letter-spacing: .08em;
+  text-shadow: 0 0 40px rgba(201,168,76,.3), 0 0 80px rgba(201,168,76,.1);
+}
+.subtitle {
+  color: #a8885a;
+  font-family: "Cormorant Garamond", serif;
+  font-size: .95rem;
+  font-style: italic;
+  letter-spacing: .2em;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  opacity: .5;
+}
+.divider::before, .divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold));
+}
+.divider::after { transform: scaleX(-1); }
+.divider-gem { color: var(--gold); font-size: .5rem; }
+
+.banner-switcher {
+  position: relative;
+  width: 100%;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.banner-track {
+  display: flex;
+  transition: transform .38s cubic-bezier(.32,0,.15,1);
+  will-change: transform;
+}
+.banner-card {
+  position: relative;
+  flex: 0 0 100%;
+  padding: 14px 16px;
+  overflow: hidden;
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  background: var(--panel);
+  cursor: pointer;
+  user-select: none;
+}
+.banner-card.active { cursor: default; }
+.banner-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: .06;
+  pointer-events: none;
+}
+.banner-card.aetheris::before { background: radial-gradient(ellipse at 80% 50%, rgba(201,168,76,.5) 0%, transparent 70%); }
+.banner-card.sunken::before { background: radial-gradient(ellipse at 80% 50%, rgba(45,212,191,.5) 0%, transparent 70%); }
+.banner-name {
+  margin-bottom: 2px;
+  font-family: "Cinzel Decorative", cursive;
+  font-size: .75rem;
+  letter-spacing: .1em;
+}
+.banner-card.aetheris .banner-name { color: var(--gold); }
+.banner-card.sunken .banner-name { color: var(--teal); }
+.banner-sub {
+  color: #666;
+  font-family: "Cormorant Garamond", serif;
+  font-size: .7rem;
+  font-style: italic;
+  letter-spacing: .1em;
+}
+.banner-featured {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.6rem;
+  filter: drop-shadow(0 0 8px currentColor);
+}
+.banner-card.aetheris .banner-featured { color: var(--legendary); }
+.banner-card.sunken .banner-featured { color: var(--teal); }
+.banner-rateup {
+  display: inline-block;
+  margin-top: 3px;
+  padding: 2px 6px;
+  border: 1px solid rgba(45,212,191,.25);
+  border-radius: 4px;
+  background: rgba(45,212,191,.12);
+  color: var(--teal);
+  font-size: .48rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+.banner-dots { display: flex; justify-content: center; gap: 6px; margin-top: 8px; }
+.banner-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #333;
+  transition: background .2s, transform .2s;
+}
+.banner-dot.active { background: var(--gold); transform: scale(1.3); }
+
+.stage-single {
+  width: 100%;
+  max-width: 240px;
+  aspect-ratio: 2/3;
+  margin: 0 auto 24px;
+  perspective: 1000px;
+}
+.stage-multi {
+  display: none;
+  width: 100%;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.stage-multi.active { display: grid; }
+.stage-multi .mini-card { aspect-ratio: 2/3; perspective: 700px; }
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform .7s cubic-bezier(.35,.01,.2,1);
+}
+.card-inner.flipped { transform: rotateY(180deg); }
+.card-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  overflow: hidden;
+  border-radius: 12px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.card-back {
+  border: 1px solid var(--border2);
+  background: var(--panel2);
+  box-shadow: inset 0 0 30px rgba(0,0,0,.4);
+}
+.card-back::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(201,168,76,.12);
+  border-radius: 8px;
+}
+.card-back::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(201,168,76,.025) 0, rgba(201,168,76,.025) 1px, transparent 1px, transparent 14px),
+    repeating-linear-gradient(-45deg, rgba(201,168,76,.025) 0, rgba(201,168,76,.025) 1px, transparent 1px, transparent 14px);
+}
+.card-back .emblem {
+  position: relative;
+  z-index: 1;
+  color: rgba(201,168,76,.2);
+  font-family: "Cinzel Decorative", cursive;
+  font-size: 2rem;
+  user-select: none;
+}
+.stage-single .card-back .emblem { font-size: 3.5rem; }
+.card-front {
+  border: 1px solid var(--border2);
+  background: var(--panel2);
+  transform: rotateY(180deg);
+}
+.card-front.rarity-common { border-color: rgba(212,208,200,.2); }
+.card-front.rarity-rare { border-color: rgba(94,180,255,.25); }
+.card-front.rarity-epic { border-color: rgba(192,132,252,.3); }
+.card-front.rarity-legendary { border-color: rgba(249,115,22,.4); }
+.card-front.rarity-mythic { border-color: rgba(239,68,68,.5); }
+
+.rarity-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  opacity: 0;
+  transition: opacity .6s .4s;
+}
+.card-inner.flipped .rarity-glow { opacity: 1; }
+.glow-common { background: radial-gradient(ellipse at 50% 110%, rgba(212,208,200,.08) 0%, transparent 65%); }
+.glow-rare { background: radial-gradient(ellipse at 50% 110%, rgba(94,180,255,.14) 0%, transparent 65%); }
+.glow-epic { background: radial-gradient(ellipse at 50% 110%, rgba(192,132,252,.18) 0%, transparent 65%); }
+.glow-legendary { background: radial-gradient(ellipse at 50% 110%, rgba(249,115,22,.25) 0%, transparent 65%); }
+.glow-mythic { background: radial-gradient(ellipse at 50% 110%, rgba(239,68,68,.4) 0%, transparent 65%); }
+
+.rarity-common { color: var(--common); }
+.rarity-rare { color: var(--rare); }
+.rarity-epic { color: var(--epic); }
+.rarity-legendary { color: var(--legendary); }
+.rarity-mythic { color: var(--mythic); }
+
+@keyframes shimmer {
+  0% { background-position: -250% center; }
+  100% { background-position: 250% center; }
+}
+.legendary-shimmer {
+  background: linear-gradient(105deg, transparent 35%, rgba(249,115,22,.18) 50%, transparent 65%);
+  background-size: 250% auto;
+  animation: shimmer 2.2s linear infinite;
+}
+.epic-shimmer {
+  background: linear-gradient(105deg, transparent 35%, rgba(192,132,252,.12) 50%, transparent 65%);
+  background-size: 250% auto;
+  animation: shimmer 3s linear infinite;
+}
+.mythic-shimmer {
+  background: linear-gradient(105deg, transparent 25%, rgba(239,68,68,.2) 50%, transparent 75%);
+  background-size: 250% auto;
+  animation: shimmer 1.6s linear infinite;
+}
+.item-icon {
+  position: relative;
+  z-index: 1;
+  font-size: 1.6rem;
+  filter: drop-shadow(0 0 8px currentColor);
+  opacity: 0;
+  transform: scale(.4) translateY(8px);
+  transition: opacity .35s .65s, transform .4s .65s cubic-bezier(.34,1.4,.64,1);
+}
+.stage-single .item-icon { font-size: clamp(3rem, 13vw, 5rem); }
+.card-inner.flipped .item-icon { opacity: 1; transform: scale(1) translateY(0); }
+.item-name {
+  position: relative;
+  z-index: 1;
+  padding: 0 6px;
+  font-size: .48rem;
+  letter-spacing: .1em;
+  line-height: 1.4;
+  text-align: center;
+  opacity: 0;
+  transition: opacity .3s .9s;
+}
+.stage-single .item-name {
+  padding: 0 14px;
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(.8rem, 3.5vw, 1.05rem);
+  font-weight: 600;
+  letter-spacing: .12em;
+}
+.card-inner.flipped .item-name { opacity: 1; }
+.rarity-tag {
+  position: relative;
+  z-index: 1;
+  padding: 2px 7px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: .38rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity .3s 1s;
+}
+.stage-single .rarity-tag { padding: 4px 14px; font-size: .6rem; letter-spacing: .25em; }
+.card-inner.flipped .rarity-tag { opacity: 1; }
+
+@keyframes bestPulse {
+  0%,100% { box-shadow: 0 0 0 0 currentColor; }
+  50% { box-shadow: 0 0 0 3px currentColor; }
+}
+.best-card .card-front { animation: bestPulse 1s ease 1.4s 3; }
+.best-banner {
+  display: none;
+  margin-bottom: 16px;
+  padding: 10px 20px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  background: rgba(0,0,0,.3);
+  font: 600 .85rem "Cormorant Garamond", serif;
+  letter-spacing: .15em;
+  text-align: center;
+  animation: bannerIn .4s cubic-bezier(.34,1.2,.64,1);
+}
+.best-banner.visible { display: block; }
+@keyframes bannerIn { from { opacity: 0; transform: scale(.95) translateY(-6px); } to { opacity: 1; transform: none; } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+.currency {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.currency-gem { font-size: 1rem; filter: drop-shadow(0 0 6px rgba(201,168,76,.5)); }
+.pulls-left { color: #777; font-size: .8rem; letter-spacing: .2em; }
+.pulls-left span { color: var(--text-hi); font-size: .95rem; font-weight: 600; }
+.currency-edit { display: flex; gap: 8px; margin-bottom: 22px; }
+.currency-edit input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  outline: none;
+  background: var(--panel);
+  color: var(--text-hi);
+  font: .75rem "Cinzel", serif;
+  letter-spacing: .1em;
+  -moz-appearance: textfield;
+  transition: border-color .2s;
+}
+.currency-edit input::-webkit-inner-spin-button,
+.currency-edit input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.currency-edit input::placeholder { color: #666; }
+.currency-edit input:focus { border-color: rgba(201,168,76,.4); }
+
+.actions { display: flex; flex-direction: column; gap: 8px; margin-bottom: 22px; }
+.btn-row { display: flex; gap: 8px; }
+.btn-row .btn { flex: 1; }
+.btn {
+  position: relative;
+  width: 100%;
+  padding: 13px 16px;
+  overflow: hidden;
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--text-hi);
+  cursor: pointer;
+  font: .75rem "Cinzel", serif;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  transition: background .2s, border-color .2s, box-shadow .2s, transform .1s;
+}
+.btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,.03) 0%, transparent 100%);
+  pointer-events: none;
+}
+.btn:active { transform: scale(.97); }
+.btn:hover:not(:disabled) { background: var(--panel2); border-color: var(--border2); box-shadow: 0 0 12px rgba(255,255,255,.04); }
+.btn:disabled { cursor: not-allowed; opacity: .3; }
+.btn-primary {
+  border-color: rgba(201,168,76,.35);
+  background: linear-gradient(180deg, rgba(201,168,76,.08) 0%, rgba(201,168,76,.04) 100%);
+  color: #e8d898;
+  box-shadow: inset 0 1px 0 rgba(201,168,76,.1);
+}
+.btn-primary:hover:not(:disabled) {
+  border-color: rgba(201,168,76,.55) !important;
+  background: linear-gradient(180deg, rgba(201,168,76,.14) 0%, rgba(201,168,76,.08) 100%) !important;
+  box-shadow: 0 0 20px rgba(201,168,76,.12), inset 0 1px 0 rgba(201,168,76,.15) !important;
+}
+.btn-ten {
+  border-color: rgba(192,132,252,.3);
+  background: linear-gradient(180deg, rgba(192,132,252,.07) 0%, rgba(192,132,252,.03) 100%);
+  color: #d8aaff;
+  box-shadow: inset 0 1px 0 rgba(192,132,252,.08);
+}
+.btn-ten:hover:not(:disabled) {
+  border-color: rgba(192,132,252,.5) !important;
+  background: linear-gradient(180deg, rgba(192,132,252,.12) 0%, rgba(192,132,252,.06) 100%) !important;
+  box-shadow: 0 0 20px rgba(192,132,252,.1), inset 0 1px 0 rgba(192,132,252,.12) !important;
+}
+.btn-inv {
+  border-color: rgba(94,180,255,.25);
+  background: rgba(94,180,255,.04);
+  color: #90c8ff;
+  font-size: .7rem;
+}
+.btn-summary, .btn-add {
+  border-color: rgba(201,168,76,.25);
+  background: rgba(201,168,76,.04);
+  color: var(--gold);
+  font-size: .7rem;
+}
+.btn-export {
+  border-color: rgba(239,68,68,.25);
+  background: rgba(239,68,68,.04);
+  color: #f87171;
+  font-size: .7rem;
+}
+.btn-add { width: auto; padding: 10px 16px; white-space: nowrap; }
+.cost {
+  display: block;
+  margin-top: 3px;
+  color: rgba(255,255,255,.45);
+  font-size: .55rem;
+  letter-spacing: .1em;
+}
+.inv-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--epic);
+  color: #07070f;
+  font-size: .5rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
+.pity-wrap { margin-bottom: 18px; }
+.pity-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 7px;
+  color: #555;
+  font-size: .6rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+.pity-label span:last-child { color: #666; }
+.pity-bar-bg {
+  width: 100%;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--panel);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.5);
+}
+.pity-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #5eb4ff, #c084fc, #f97316);
+  box-shadow: 0 0 6px rgba(192,132,252,.4);
+  transition: width .5s cubic-bezier(.4,0,.2,1);
+}
+.pity-bar-fill.sunken { background: linear-gradient(90deg, #2dd4bf, #0d9488); }
+.pity-bar-fill.warn { animation: pityPulse 1.2s ease-in-out infinite; box-shadow: 0 0 10px rgba(249,115,22,.6); }
+.pity-bar-fill.danger {
+  background: linear-gradient(90deg, #f97316, #fbbf24) !important;
+  animation: pityPulse .6s ease-in-out infinite;
+  box-shadow: 0 0 14px rgba(249,115,22,.8);
+}
+@keyframes pityPulse { 0%,100% { opacity: 1; } 50% { opacity: .6; } }
+
+.odds {
+  width: 100%;
+  margin-bottom: 22px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+}
+.odds-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: .7rem;
+  letter-spacing: .1em;
+}
+.odds-row:last-child { border-bottom: none; }
+.odds-pct {
+  color: #555;
+  font-family: "Cormorant Garamond", serif;
+  font-size: .65rem;
+  font-style: italic;
+}
+.history-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  color: #444;
+  font-size: .58rem;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+}
+.history-label::after { content: ""; flex: 1; height: 1px; background: var(--border2); }
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.history::-webkit-scrollbar, .inv-body::-webkit-scrollbar, .sum-body::-webkit-scrollbar, .exp-body::-webkit-scrollbar { width: 2px; }
+.history::-webkit-scrollbar-thumb, .inv-body::-webkit-scrollbar-thumb, .sum-body::-webkit-scrollbar-thumb, .exp-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  font-size: .68rem;
+  letter-spacing: .08em;
+  animation: fadeIn .25s ease;
+  transition: border-color .2s;
+}
+.history-item:hover { border-color: var(--border2); }
+.history-pull { color: #555; font: italic .6rem "Cormorant Garamond", serif; }
+
+.inv-overlay, .sum-overlay, .exp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: rgba(0,0,0,.7);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s ease;
+}
+.sum-overlay { z-index: 12; }
+.exp-overlay { z-index: 20; background: rgba(0,0,0,.8); backdrop-filter: blur(6px); }
+.inv-overlay.open, .sum-overlay.open, .exp-overlay.open { opacity: 1; pointer-events: all; }
+.inv-panel, .sum-panel, .exp-panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 11;
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+  overflow: hidden;
+  border-top: 1px solid var(--border2);
+  border-radius: 20px 20px 0 0;
+  background: #0a0a14;
+  box-shadow: 0 -20px 60px rgba(0,0,0,.6);
+  transform: translateY(100%);
+  transition: transform .4s cubic-bezier(.32,0,.15,1);
+}
+.sum-panel { z-index: 13; max-height: 88vh; background: #09090f; }
+.exp-panel { z-index: 21; max-height: 92vh; background: #09090f; }
+.inv-panel.open, .sum-panel.open, .exp-panel.open { transform: translateY(0); }
+.inv-handle {
+  flex-shrink: 0;
+  width: 32px;
+  height: 3px;
+  margin: 14px auto 0;
+  border-radius: 2px;
+  background: var(--border2);
+}
+.inv-header, .sum-header, .exp-header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 22px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.inv-title {
+  color: var(--text-hi);
+  font-family: "Cinzel Decorative", cursive;
+  font-size: .95rem;
+  letter-spacing: .1em;
+}
+.inv-stats { color: #666; font: italic .6rem "Cormorant Garamond", serif; letter-spacing: .15em; }
+.inv-close {
+  padding: 4px 8px;
+  border: none;
+  background: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: color .2s;
+}
+.inv-close:hover { color: var(--text-hi); }
+.inv-tabs {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0;
+  padding: 0 22px;
+  border-bottom: 1px solid var(--border);
+}
+.inv-tab {
+  flex: 1;
+  margin-bottom: -1px;
+  padding: 11px 0;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: #555;
+  cursor: pointer;
+  font: .62rem "Cinzel", serif;
+  letter-spacing: .25em;
+  text-align: center;
+  text-transform: uppercase;
+  transition: color .2s, border-color .2s;
+}
+.inv-tab:hover { color: #888; }
+.inv-tab.active { color: var(--text-hi); border-bottom-color: var(--gold); }
+.inv-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 18px 36px;
+}
+.inv-tier { margin-bottom: 22px; }
+.inv-tier-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: .55rem;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+}
+.inv-tier-count {
+  margin-left: auto;
+  color: #555;
+  font: italic .55rem "Cormorant Garamond", serif;
+}
+.inv-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.inv-item, .cdx-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 6px 9px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+  animation: fadeIn .2s ease;
+  transition: border-color .2s, background .2s;
+}
+.inv-item:hover, .cdx-item:hover { background: var(--panel2); }
+.inv-item-icon, .cdx-item-icon { font-size: 1.6rem; line-height: 1; }
+.inv-item-name, .cdx-item-name {
+  font: 600 .44rem/1.4 "Cormorant Garamond", serif;
+  letter-spacing: .06em;
+  text-align: center;
+}
+.inv-item-count {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  color: #666;
+  font: .5rem "Cormorant Garamond", serif;
+  letter-spacing: 0;
+}
+.inv-item-count.many { color: #888; }
+.inv-empty {
+  padding: 48px 0;
+  color: #444;
+  font: italic .75rem "Cormorant Garamond", serif;
+  letter-spacing: .2em;
+  text-align: center;
+}
+.cdx-item.locked { opacity: .55; }
+.cdx-item.locked .cdx-item-icon { filter: blur(4px) grayscale(.8); }
+.cdx-item.locked .cdx-item-name { color: #555 !important; }
+.cdx-item.unlocked { animation: cdxUnlock .4s cubic-bezier(.34,1.4,.64,1); }
+@keyframes cdxUnlock { 0% { opacity: .4; transform: scale(.85); } 100% { opacity: 1; transform: scale(1); } }
+.cdx-check {
+  position: absolute;
+  top: 5px;
+  right: 7px;
+  color: var(--gold);
+  font-size: .5rem;
+  opacity: 0;
+  transition: opacity .3s;
+}
+.cdx-item.unlocked .cdx-check { opacity: 1; }
+.cdx-progress {
+  padding: 6px 0 14px;
+  color: #666;
+  font: italic .58rem "Cormorant Garamond", serif;
+  letter-spacing: .15em;
+  text-align: center;
+}
+
+.sum-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  padding: 20px 22px 40px;
+}
+.sum-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.sum-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 14px 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+}
+.sum-stat-val {
+  color: var(--text-hi);
+  font: 700 1.35rem/1 "Cinzel Decorative", cursive;
+}
+.sum-stat-label {
+  color: #666;
+  font-size: .48rem;
+  letter-spacing: .15em;
+  text-align: center;
+  text-transform: uppercase;
+}
+.sum-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  color: #555;
+  font-size: .58rem;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+}
+.sum-section-title::after { content: ""; flex: 1; height: 1px; background: var(--border2); }
+.sum-bars { display: flex; flex-direction: column; gap: 8px; }
+.sum-bar-row { display: flex; align-items: center; gap: 10px; }
+.sum-bar-label { flex-shrink: 0; width: 80px; font-size: .65rem; letter-spacing: .08em; }
+.sum-bar-track { flex: 1; height: 6px; overflow: hidden; border-radius: 3px; background: var(--panel); }
+.sum-bar-fill { height: 100%; border-radius: 3px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+.sum-bar-fill.rarity-common { background: var(--common); }
+.sum-bar-fill.rarity-rare { background: var(--rare); box-shadow: 0 0 6px rgba(94,180,255,.4); }
+.sum-bar-fill.rarity-epic { background: var(--epic); box-shadow: 0 0 6px rgba(192,132,252,.4); }
+.sum-bar-fill.rarity-legendary { background: var(--legendary); box-shadow: 0 0 8px rgba(249,115,22,.5); }
+.sum-bar-fill.rarity-mythic { background: var(--mythic); box-shadow: 0 0 8px rgba(239,68,68,.6); }
+.sum-bar-count {
+  flex-shrink: 0;
+  width: 30px;
+  color: #666;
+  font: .6rem "Cormorant Garamond", serif;
+  text-align: right;
+}
+.sum-best {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  background: var(--panel);
+}
+.sum-best-icon { font-size: 2.4rem; filter: drop-shadow(0 0 10px currentColor); }
+.sum-best-info { flex: 1; }
+.sum-best-name {
+  color: var(--text-hi);
+  font: 600 1rem "Cormorant Garamond", serif;
+  letter-spacing: .08em;
+}
+.sum-best-rarity { margin-top: 3px; font-size: .55rem; letter-spacing: .2em; text-transform: uppercase; }
+.sum-best-pull { margin-top: 5px; color: #666; font: italic .55rem "Cormorant Garamond", serif; }
+.sum-milestones { display: flex; flex-direction: column; gap: 8px; }
+.sum-milestone {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  font-size: .68rem;
+  letter-spacing: .06em;
+}
+.sum-milestone.locked { opacity: .4; }
+.sum-milestone-icon { font-size: 1rem; }
+.sum-milestone-check { margin-left: auto; color: var(--gold); font-size: .7rem; }
+
+.exp-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  overflow-y: auto;
+  padding: 20px 18px 32px;
+}
+#exp-card {
+  width: 100%;
+  max-width: 360px;
+  padding: 20px 16px 16px;
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  background: #07070f;
+  color: var(--text);
+  font-family: "Cinzel", serif;
+}
+.exp-card-header { margin-bottom: 14px; text-align: center; }
+.exp-card-title {
+  color: #ede8d8;
+  font: 1.1rem "Cinzel Decorative", cursive;
+  letter-spacing: .1em;
+  text-shadow: 0 0 20px rgba(201,168,76,.3);
+}
+.exp-card-sub {
+  margin-top: 3px;
+  color: rgba(201,168,76,.5);
+  font-size: .55rem;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+}
+.exp-divider { height: 1px; margin: 0 0 12px; background: #2a2a40; opacity: .6; }
+.exp-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 12px; }
+.exp-mini {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  overflow: hidden;
+  aspect-ratio: 2/3;
+  border: 1px solid #2a2a40;
+  border-radius: 8px;
+  background: #141422;
+}
+.exp-mini-icon { position: relative; z-index: 1; font-size: 1.1rem; line-height: 1; }
+.exp-mini-tag { position: relative; z-index: 1; padding: 0 2px; font-size: .3rem; letter-spacing: .1em; text-align: center; text-transform: uppercase; }
+.exp-mini-glow { position: absolute; inset: 0; border-radius: 8px; pointer-events: none; }
+.exp-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  color: #777;
+  font-size: .5rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+.exp-actions { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 360px; }
+.exp-notice {
+  min-height: 1.2em;
+  color: #555;
+  font: italic .62rem "Cormorant Garamond", serif;
+  letter-spacing: .08em;
+  text-align: center;
+}
+
+.leg-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(249,115,22,.55) 0%, rgba(201,168,76,.2) 40%, transparent 70%);
+  opacity: 0;
+  transition: opacity .08s ease;
+}
+.leg-flash.on { opacity: 1; }
+.leg-dim {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  background: rgba(0,0,0,0);
+  transition: background .5s ease;
+}
+.leg-dim.on { background: rgba(0,0,0,.75); }
+#leg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 31;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+#leg-canvas.on { opacity: 1; }
+.leg-spotlight { position: relative; z-index: 32; }
+.card-inner.legendary-flip { transition: transform 1.4s cubic-bezier(.25,.01,.1,1) !important; }
+.leg-float-card {
+  position: fixed;
+  z-index: 40;
+  border-radius: 12px;
+  pointer-events: none;
+  transform-origin: center center;
+  transition: none;
+}
+.leg-float-card.expanding {
+  transition: top .45s cubic-bezier(.32,0,.15,1), left .45s cubic-bezier(.32,0,.15,1), width .45s cubic-bezier(.32,0,.15,1), height .45s cubic-bezier(.32,0,.15,1);
+}
+.leg-float-card.shrinking {
+  transition: top .4s cubic-bezier(.4,0,.6,1), left .4s cubic-bezier(.4,0,.6,1), width .4s cubic-bezier(.4,0,.6,1), height .4s cubic-bezier(.4,0,.6,1), opacity .3s ease;
+}
+.leg-tap-prompt {
+  position: fixed;
+  left: 50%;
+  bottom: 18%;
+  z-index: 35;
+  color: rgba(237,232,216,.6);
+  font: italic .85rem "Cormorant Garamond", serif;
+  letter-spacing: .2em;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%);
+  transition: opacity .3s ease, visibility .3s ease;
+  visibility: hidden;
+  white-space: nowrap;
+}
+.leg-tap-prompt.visible {
+  opacity: 1;
+  visibility: visible;
+  animation: promptPulse 1.4s ease-in-out infinite;
+}
+@keyframes promptPulse { 0%,100% { opacity: .4; } 50% { opacity: 1; } }
+
+@media (min-aspect-ratio: 1/1) and (min-width: 600px) {
+  body { height: 100vh; padding: 0; overflow: hidden; justify-content: center; }
+  .wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr;
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    padding: 0;
+  }
+  .ls-header {
+    grid-column: 1 / -1;
+    display: flex !important;
+    align-items: baseline;
+    justify-content: center;
+    gap: 16px;
+    padding: 12px 32px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ls-header h1 { margin-bottom: 0; font-size: clamp(1.1rem, 2.5vw, 1.6rem); }
+  .ls-header .subtitle { margin-bottom: 0; font-size: .8rem; }
+  .ls-left {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 16px 28px;
+    border-right: 1px solid var(--border);
+  }
+  .ls-right {
+    display: flex !important;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 14px 24px;
+  }
+  .stage-single { max-width: 170px; margin-bottom: 10px; }
+  .stage-multi { gap: 5px; margin-bottom: 10px; }
+  .best-banner { margin-bottom: 8px; padding: 7px 14px; font-size: .75rem; }
+  .currency { margin-bottom: 6px; }
+  .currency-edit, .actions, .pity-wrap, .odds { margin-bottom: 10px; }
+  .history { max-height: 100px; }
+  .portrait-header { display: none; }
+}
+.ls-header { display: none; }
+.ls-left, .ls-right { display: contents; }
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+  <div class="portrait-header">
+    <div class="title-ornament">✦ &nbsp; Summoning Gate &nbsp; ✦</div>
+    <h1>AETHERIS</h1>
+  </div>
+
+  <div class="ls-header">
+    <h1>AETHERIS</h1>
+    <p class="subtitle">Summoning Gate</p>
+  </div>
+
+  <div class="ls-left">
+    <div class="banner-switcher" id="banner-switcher">
+      <div class="banner-track" id="banner-track">
+        <div class="banner-card aetheris active" onclick="selectBanner(0)">
+          <div class="banner-name">Aetheris</div>
+          <div class="banner-sub">Summoning Gate · Standard</div>
+          <div class="banner-featured">✨</div>
+        </div>
+        <div class="banner-card sunken" onclick="selectBanner(1)">
+          <div class="banner-name">The Sunken Archive</div>
+          <div class="banner-sub">Rate-Up: <span class="banner-rateup">🐚 The Drowned God ×2</span></div>
+          <div class="banner-featured">🌊</div>
+        </div>
+      </div>
+      <div class="banner-dots">
+        <div class="banner-dot active" id="dot-0"></div>
+        <div class="banner-dot" id="dot-1"></div>
+      </div>
+    </div>
+
+    <div class="stage-single" id="stage-single">
+      <div class="card-inner" id="card-single">
+        <div class="card-face card-back"><span class="emblem">✦</span></div>
+        <div class="card-face card-front" id="cf-single">
+          <div class="rarity-glow" id="glow-single"></div>
+          <div class="item-icon" id="icon-single">✦</div>
+          <div class="item-name" id="name-single"></div>
+          <div class="rarity-tag" id="tag-single"></div>
+        </div>
+      </div>
+    </div>
+    <div class="stage-multi" id="stage-multi"></div>
+    <div class="best-banner" id="best-banner"></div>
+  </div>
+
+  <div class="ls-right">
+    <div class="divider"><span class="divider-gem">◆</span></div>
+
+    <div class="currency">
+      <span class="currency-gem">💎</span>
+      <span class="pulls-left">Pulls: <span id="pulls-left">100</span></span>
+    </div>
+    <div class="currency-edit">
+      <input type="number" id="add-amount" min="1" max="9999" placeholder="Add pulls…">
+      <button class="btn btn-add" onclick="addPulls()">+ Add</button>
+    </div>
+
+    <div class="actions">
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-one" onclick="doPull(1)">
+          ✦ Summon ×1
+          <span class="cost">1 pull</span>
+        </button>
+        <button class="btn btn-ten" id="btn-ten" onclick="doPull(10)">
+          ✦ Summon ×10
+          <span class="cost">10 pulls</span>
+        </button>
+      </div>
+      <button class="btn btn-inv" onclick="openInv()">⬡ Collection <span class="inv-badge" id="inv-badge">0</span></button>
+      <div class="btn-row">
+        <button class="btn btn-summary" onclick="openSummary()">◈ Summary</button>
+        <button class="btn btn-export" id="btn-export" onclick="openExport()" disabled>↗ Share Pull</button>
+      </div>
+      <button class="btn" id="btn-reset" onclick="doReset()">↺ Reset</button>
+    </div>
+
+    <div class="pity-wrap">
+      <div class="pity-label"><span>Pity</span><span id="pity-count">0 / 50</span></div>
+      <div class="pity-bar-bg"><div class="pity-bar-fill" id="pity-bar" style="width:0%"></div></div>
+    </div>
+
+    <div class="odds" id="odds-table">
+      <div class="odds-row"><span class="rarity-mythic">◆ Mythic</span><span class="odds-pct">0.02%</span></div>
+      <div class="odds-row"><span class="rarity-legendary">◆ Legendary</span><span class="odds-pct" id="odds-legendary">2% · guaranteed at 50</span></div>
+      <div class="odds-row"><span class="rarity-epic">◆ Epic</span><span class="odds-pct">8%</span></div>
+      <div class="odds-row"><span class="rarity-rare">◆ Rare</span><span class="odds-pct">20%</span></div>
+      <div class="odds-row"><span class="rarity-common">◆ Common</span><span class="odds-pct">70%</span></div>
+    </div>
+
+    <div class="history-label">Recent Pulls</div>
+    <div class="history" id="history"></div>
+  </div>
+</div>
+
+<div class="leg-flash" id="leg-flash"></div>
+<div class="leg-dim" id="leg-dim"></div>
+<canvas id="leg-canvas"></canvas>
+<div class="leg-tap-prompt" id="leg-tap-prompt">tap to continue</div>
+
+<div class="inv-overlay" id="inv-overlay" onclick="closeInv()"></div>
+<div class="inv-panel" id="inv-panel">
+  <div class="inv-handle"></div>
+  <div class="inv-header">
+    <span class="inv-title">Collection</span>
+    <span class="inv-stats" id="inv-stats">0 unique · 0 total</span>
+    <button class="inv-close" onclick="closeInv()">✕</button>
+  </div>
+  <div class="inv-tabs">
+    <button class="inv-tab active" id="tab-collection" onclick="switchTab('collection')">Collection</button>
+    <button class="inv-tab" id="tab-codex" onclick="switchTab('codex')">Codex</button>
+  </div>
+  <div class="inv-body" id="inv-body">
+    <div class="inv-empty" id="inv-empty">No items yet. Begin summoning…</div>
+  </div>
+</div>
+
+<div class="sum-overlay" id="sum-overlay" onclick="closeSummary()"></div>
+<div class="sum-panel" id="sum-panel">
+  <div class="inv-handle"></div>
+  <div class="sum-header">
+    <span class="inv-title">Session Summary</span>
+    <button class="inv-close" onclick="closeSummary()">✕</button>
+  </div>
+  <div class="sum-body" id="sum-body"></div>
+</div>
+
+<div class="exp-overlay" id="exp-overlay" onclick="closeExport()"></div>
+<div class="exp-panel" id="exp-panel">
+  <div class="inv-handle"></div>
+  <div class="exp-header">
+    <span class="inv-title">Share Pull</span>
+    <button class="inv-close" onclick="closeExport()">✕</button>
+  </div>
+  <div class="exp-body">
+    <div id="exp-card"></div>
+    <div class="exp-actions">
+      <button class="btn btn-primary" onclick="doSaveImage()">⬇ Save / Open Image</button>
+      <button class="btn btn-ten" onclick="doShareImage()">↗ Share via…</button>
+      <button class="btn" onclick="doCopyText()">⎘ Copy Text</button>
+    </div>
+    <div class="exp-notice" id="exp-notice"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+const SAVE_KEY = "aetheris_v1";
+const MAX_HISTORY = 200;
+const PITY_THRESHOLD = 50;
+const RARITY_ORDER = { common: 0, rare: 1, epic: 2, legendary: 3, mythic: 4 };
+const RATES = { mythic: .0002, legendary: .02, epic: .08, rare: .20, common: .6998 };
+
+const BANNERS = [
+  { id: "aetheris", rateUp: null },
+  { id: "sunken", rateUp: "The Drowned God" },
+];
+
+const ITEMS = {
+  common: [
+    { name: "Iron Shield", icon: "🛡️" }, { name: "Wooden Staff", icon: "🪄" },
+    { name: "Stone Amulet", icon: "🪨" }, { name: "Copper Ring", icon: "💍" },
+    { name: "Tattered Cloak", icon: "🧥" }, { name: "Flint Dagger", icon: "🔪" },
+    { name: "Hemp Rope", icon: "🪢" }, { name: "Worn Boots", icon: "👟" },
+    { name: "Canteen", icon: "🫙" }, { name: "Bone Charm", icon: "🦴" },
+    { name: "Field Lantern", icon: "🪔" }, { name: "River Stone", icon: "⚫" },
+    { name: "Crude Bow", icon: "🏹" }, { name: "Peasant's Hat", icon: "🎩" },
+    { name: "Tin Buckle", icon: "🔩" }, { name: "Whetstone", icon: "🪨" },
+    { name: "Dried Herb", icon: "🌿" }, { name: "Cracked Orb", icon: "🔮" },
+    { name: "Tallow Candle", icon: "🕯️" }, { name: "Leather Wrap", icon: "🫙" },
+  ],
+  rare: [
+    { name: "Silver Bow", icon: "🏹" }, { name: "Frost Dagger", icon: "🗡️" },
+    { name: "Tide Orb", icon: "🔮" }, { name: "Storm Boots", icon: "👢" },
+    { name: "Ember Flask", icon: "🔥" }, { name: "Shadow Mask", icon: "🎭" },
+    { name: "Runed Gauntlet", icon: "🥊" }, { name: "Verdant Seed", icon: "🌿" },
+    { name: "Starfall Coin", icon: "🪙" }, { name: "Hollow Crown", icon: "👑" },
+    { name: "Ashwood Wand", icon: "🪄" }, { name: "Gilded Compass", icon: "🧭" },
+    { name: "Thornweave Net", icon: "🕸️" }, { name: "Runestone Shard", icon: "🪨" },
+    { name: "Mist Lantern", icon: "🪔" }, { name: "Serpent Band", icon: "🐍" },
+  ],
+  epic: [
+    { name: "Voidweave Armor", icon: "⚔️" }, { name: "Lunar Grimoire", icon: "📖" },
+    { name: "Eclipse Blade", icon: "🌙" }, { name: "Abyssal Trident", icon: "🔱" },
+    { name: "Wraithbone Staff", icon: "🦷" }, { name: "Soulbound Mirror", icon: "🪞" },
+    { name: "Tempest Core", icon: "⚡" }, { name: "Bloodstone Ring", icon: "💎" },
+    { name: "Phantom Shroud", icon: "👻" }, { name: "Infernal Axe", icon: "🪓" },
+    { name: "Starweave Robe", icon: "🌌" }, { name: "Duskblade", icon: "🌑" },
+    { name: "Arcane Catalyst", icon: "🔯" }, { name: "Rift Compass", icon: "🧭" },
+    { name: "Cursed Idol", icon: "🗿" },
+  ],
+  legendary: [
+    { name: "Aetheris Crown", icon: "✨" }, { name: "Dragonheart", icon: "🐉" },
+    { name: "Cosmic Shard", icon: "💫" }, { name: "Voidreaper", icon: "☄️" },
+    { name: "Eye of Eternity", icon: "👁️" }, { name: "Celestial Codex", icon: "📜" },
+    { name: "Sunforge Blade", icon: "🌟" }, { name: "Stormcaller's Fist", icon: "⛈️" },
+    { name: "Abyssal Heart", icon: "🖤" }, { name: "The Pale Throne", icon: "🪑" },
+    { name: "Worldbreaker", icon: "🌍" },
+  ],
+  mythic: [
+    { name: "The First Flame", icon: "🔥" },
+    { name: "Void Sovereign", icon: "🌑" },
+    { name: "Eternity's End", icon: "⏳" },
+    { name: "Genesis Core", icon: "🌀" },
+    { name: "The Fallen Star", icon: "💥" },
+    { name: "The Drowned God", icon: "🐚" },
+  ],
+};
+
+let pulls = 100;
+let pity = 0;
+let totalPulls = 0;
+let totalCollected = 0;
+let singleFlipped = false;
+let pulling = false;
+let activeBanner = 0;
+let activeTab = "collection";
+let lastResults = [];
+let pitySoundedAt = -1;
+let audioContext = null;
+
+const $ = id => document.getElementById(id);
+const rarityClass = r => `rarity-${r}`;
+const rarityLabel = r => r.charAt(0).toUpperCase() + r.slice(1);
+const glowClass = r => `glow-${r}`;
+const shimmerClass = r => r === "mythic" ? "mythic-shimmer" : r === "legendary" ? "legendary-shimmer" : r === "epic" ? "epic-shimmer" : "";
+
+function audioCtx() {
+  if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioContext.state === "suspended") audioContext.resume();
+  return audioContext;
+}
+
+function tone(freq, type, gainVal, startDelay, duration) {
+  const c = audioCtx();
+  const osc = c.createOscillator();
+  const gain = c.createGain();
+  osc.connect(gain);
+  gain.connect(c.destination);
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, c.currentTime + startDelay);
+  gain.gain.setValueAtTime(gainVal, c.currentTime + startDelay);
+  gain.gain.exponentialRampToValueAtTime(.0001, c.currentTime + startDelay + duration);
+  osc.start(c.currentTime + startDelay);
+  osc.stop(c.currentTime + startDelay + duration + .02);
+}
+
+function noise(gainVal, startDelay, duration) {
+  const c = audioCtx();
+  const buf = c.createBuffer(1, c.sampleRate * duration, c.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  const src = c.createBufferSource();
+  const gain = c.createGain();
+  src.buffer = buf;
+  src.connect(gain);
+  gain.connect(c.destination);
+  gain.gain.setValueAtTime(gainVal, c.currentTime + startDelay);
+  gain.gain.exponentialRampToValueAtTime(.0001, c.currentTime + startDelay + duration);
+  src.start(c.currentTime + startDelay);
+}
+
+const SFX = {
+  click() { tone(600, "square", .07, 0, .04); tone(400, "square", .04, .03, .03); },
+  flip(r) {
+    const f = { common: 280, rare: 440, epic: 580, legendary: 760, mythic: 860 }[r] || 280;
+    noise(.03, 0, .06);
+    tone(f, "sine", .09, .02, .14);
+    tone(f * 1.5, "sine", .05, .07, .12);
+    if (r === "epic" || r === "legendary" || r === "mythic") tone(f * 2, "triangle", .04, .12, .16);
+  },
+  reveal(r) {
+    if (r === "common") {
+      tone(494, "sine", .09, 0, .12); tone(587, "sine", .06, .10, .14);
+    } else if (r === "rare") {
+      tone(587, "sine", .11, 0, .12); tone(740, "sine", .09, .10, .15); tone(880, "sine", .06, .22, .18);
+    } else if (r === "epic") {
+      tone(494, "sine", .09, 0, .10); tone(587, "sine", .11, .08, .12);
+      tone(740, "triangle", .09, .18, .15); tone(880, "sine", .11, .30, .20); tone(1175, "sine", .07, .44, .26);
+    } else {
+      [494, 587, 740, 880, 1175, 1397].forEach((f, i) => { tone(f, "sine", .13, i * .09, .22); tone(f, "triangle", .04, i * .09, .22); });
+      noise(.05, 0, .08);
+      tone(494, "sine", .09, .60, .45); tone(587, "sine", .07, .60, .45); tone(740, "sine", .07, .60, .45);
+    }
+  },
+  bestBanner(r) {
+    if (r === "mythic") { tone(1397, "sine", .12, 0, .15); tone(1865, "sine", .12, .12, .18); tone(2217, "sine", .14, .28, .34); }
+    else if (r === "legendary") { tone(1175, "sine", .11, 0, .15); tone(1397, "sine", .11, .12, .15); tone(1865, "sine", .13, .26, .32); }
+    else if (r === "epic") { tone(880, "sine", .09, 0, .15); tone(1175, "sine", .09, .14, .20); }
+    else if (r === "rare") { tone(740, "sine", .08, 0, .15); tone(880, "sine", .07, .12, .15); }
+  },
+  reset() { tone(370, "sine", .07, 0, .09); tone(280, "sine", .05, .08, .11); noise(.025, 0, .13); },
+  addPulls() { tone(800, "sine", .07, 0, .09); tone(1000, "sine", .07, .08, .11); },
+  legendaryBuild() {
+    noise(.04, 0, .3);
+    tone(110, "sine", .08, 0, .4);
+    tone(146, "sine", .07, .1, .35);
+    tone(185, "sine", .09, .22, .3);
+    tone(220, "sine", .10, .36, .25);
+    tone(277, "sine", .11, .48, .2);
+    [330, 392, 494, 587].forEach((f, i) => tone(f, "sine", .10, .52 + i * .06, .18));
+  },
+  pityFanfare() {
+    noise(.05, 0, .12);
+    tone(220, "triangle", .12, 0, .15);
+    tone(277, "triangle", .12, .1, .15);
+    tone(330, "sine", .13, .2, .18);
+    tone(440, "sine", .14, .32, .22);
+    tone(587, "sine", .12, .46, .20);
+  },
+};
+
+function selectBanner(index) {
+  activeBanner = index;
+  $("banner-track").style.transform = `translateX(-${index * 100}%)`;
+  document.querySelectorAll(".banner-card").forEach((el, i) => el.classList.toggle("active", i === index));
+  document.querySelectorAll(".banner-dot").forEach((el, i) => el.classList.toggle("active", i === index));
+  $("pity-bar").classList.toggle("sunken", BANNERS[index].id === "sunken");
+  SFX.click();
+  saveState();
+}
+
+function saveState() {
+  try {
+    const histData = [...$("history").children].slice(0, MAX_HISTORY).map(el => ({
+      icon: el.dataset.icon || "",
+      name: el.dataset.name || "",
+      rarity: el.dataset.rarity || "common",
+      pull: el.querySelector(".history-pull")?.textContent.trim() || "",
+    }));
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      pulls,
+      pity,
+      totalPulls,
+      totalCollected,
+      activeBanner,
+      collection,
+      history: histData,
+    }));
+  } catch (e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return;
+    const state = JSON.parse(raw);
+    pulls = state.pulls ?? 100;
+    pity = state.pity ?? 0;
+    totalPulls = state.totalPulls ?? 0;
+    totalCollected = state.totalCollected ?? 0;
+    activeBanner = state.activeBanner ?? 0;
+    Object.keys(collection).forEach(k => delete collection[k]);
+    if (state.collection) Object.assign(collection, state.collection);
+    $("history").innerHTML = "";
+    (state.history || []).forEach(h => $("history").appendChild(historyNode(h.rarity, { icon: h.icon, name: h.name }, h.pull)));
+    selectBanner(Math.min(activeBanner, BANNERS.length - 1));
+  } catch (e) {}
+}
+
+const collection = {};
+
+function collectItem(rarity, item) {
+  const key = item.name;
+  if (collection[key]) collection[key].count++;
+  else collection[key] = { icon: item.icon, rarity, count: 1 };
+  totalCollected++;
+  updateInvBadge();
+}
+
+function updateInvBadge() {
+  $("inv-badge").textContent = Object.keys(collection).length;
+}
+
+function clearInventoryBody() {
+  $("inv-body").querySelectorAll(".inv-tier, .cdx-progress").forEach(el => el.remove());
+}
+
+function openInv() {
+  SFX.click();
+  activeTab = "collection";
+  $("tab-collection").classList.add("active");
+  $("tab-codex").classList.remove("active");
+  renderInv();
+  $("inv-overlay").classList.add("open");
+  $("inv-panel").classList.add("open");
+}
+
+function closeInv() {
+  SFX.click();
+  $("inv-overlay").classList.remove("open");
+  $("inv-panel").classList.remove("open");
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  $("tab-collection").classList.toggle("active", tab === "collection");
+  $("tab-codex").classList.toggle("active", tab === "codex");
+  if (tab === "collection") renderInv();
+  else renderCodex();
+}
+
+function renderInv() {
+  clearInventoryBody();
+  const unique = Object.keys(collection).length;
+  $("inv-stats").textContent = `${unique} unique · ${totalCollected} total`;
+  $("inv-empty").style.display = unique === 0 ? "block" : "none";
+  if (unique === 0) return;
+
+  const tiers = ["mythic", "legendary", "epic", "rare", "common"];
+  tiers.forEach(tier => {
+    const items = Object.entries(collection)
+      .filter(([, value]) => value.rarity === tier)
+      .sort((a, b) => a[0].localeCompare(b[0]));
+    if (!items.length) return;
+    const tierEl = document.createElement("div");
+    tierEl.className = "inv-tier";
+    tierEl.innerHTML = `
+      <div class="inv-tier-label ${rarityClass(tier)}">
+        ◆ ${rarityLabel(tier)}
+        <span class="inv-tier-count">${items.length} item${items.length !== 1 ? "s" : ""}</span>
+      </div>
+      <div class="inv-grid"></div>`;
+    const grid = tierEl.querySelector(".inv-grid");
+    items.forEach(([name, data]) => {
+      const div = document.createElement("div");
+      div.className = "inv-item";
+      div.innerHTML = `
+        <span class="inv-item-count${data.count > 1 ? " many" : ""}">×${data.count}</span>
+        <span class="inv-item-icon">${data.icon}</span>
+        <span class="inv-item-name ${rarityClass(tier)}">${name}</span>`;
+      grid.appendChild(div);
+    });
+    $("inv-body").appendChild(tierEl);
+  });
+}
+
+function renderCodex() {
+  clearInventoryBody();
+  $("inv-empty").style.display = "none";
+  const tiers = ["mythic", "legendary", "epic", "rare", "common"];
+  const allItems = tiers.flatMap(tier => ITEMS[tier].map(item => ({ ...item, rarity: tier })));
+  const unlockedCount = allItems.filter(item => collection[item.name]).length;
+  $("inv-stats").textContent = `${unlockedCount} / ${allItems.length} discovered`;
+  const pct = Math.round(unlockedCount / allItems.length * 100);
+  const progressEl = document.createElement("div");
+  progressEl.className = "cdx-progress";
+  progressEl.innerHTML = `
+    <div style="width:100%;height:3px;background:var(--panel);border-radius:2px;overflow:hidden;margin-bottom:8px">
+      <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#5eb4ff,#c084fc,#f97316);border-radius:2px;transition:width .5s ease"></div>
+    </div>
+    ${pct}% discovered · ${unlockedCount} of ${allItems.length} items`;
+  $("inv-body").insertBefore(progressEl, $("inv-empty"));
+
+  tiers.forEach(tier => {
+    const tierItems = ITEMS[tier];
+    const unlockedInTier = tierItems.filter(item => collection[item.name]).length;
+    const tierEl = document.createElement("div");
+    tierEl.className = "inv-tier";
+    tierEl.innerHTML = `
+      <div class="inv-tier-label ${rarityClass(tier)}">
+        ◆ ${rarityLabel(tier)}
+        <span class="inv-tier-count">${unlockedInTier} / ${tierItems.length}</span>
+      </div>
+      <div class="inv-grid"></div>`;
+    const grid = tierEl.querySelector(".inv-grid");
+    tierItems.forEach(item => {
+      const owned = collection[item.name];
+      const div = document.createElement("div");
+      div.className = `cdx-item ${owned ? "unlocked" : "locked"}`;
+      div.innerHTML = `
+        <span class="cdx-check">✦</span>
+        <span class="cdx-item-icon">${item.icon}</span>
+        <span class="cdx-item-name ${owned ? rarityClass(tier) : ""}">${owned ? item.name : "???"}</span>
+        ${owned && owned.count > 1 ? `<span style="position:absolute;top:5px;left:7px;font-size:.45rem;color:#666;font-family:'Cormorant Garamond',serif">×${owned.count}</span>` : ""}`;
+      grid.appendChild(div);
+    });
+    $("inv-body").appendChild(tierEl);
+  });
+}
+
+function openSummary() {
+  SFX.click();
+  renderSummary();
+  $("sum-overlay").classList.add("open");
+  $("sum-panel").classList.add("open");
+}
+
+function closeSummary() {
+  SFX.click();
+  $("sum-overlay").classList.remove("open");
+  $("sum-panel").classList.remove("open");
+}
+
+function renderSummary() {
+  const body = $("sum-body");
+  const counts = { common: 0, rare: 0, epic: 0, legendary: 0, mythic: 0 };
+  Object.values(collection).forEach(value => { counts[value.rarity] += value.count; });
+  const total = totalPulls;
+  let bestEntry = null;
+  Object.entries(collection).forEach(([name, data]) => {
+    if (!bestEntry || RARITY_ORDER[data.rarity] > RARITY_ORDER[bestEntry.rarity] ||
+      (RARITY_ORDER[data.rarity] === RARITY_ORDER[bestEntry.rarity] && data.count > bestEntry.count)) {
+      bestEntry = { name, ...data };
+    }
+  });
+  const barPct = r => total > 0 ? Math.round(counts[r] / total * 100) : 0;
+  const milestones = [
+    { icon: "🎯", label: "First Pull", done: total >= 1 },
+    { icon: "💫", label: "10 Pulls", done: total >= 10 },
+    { icon: "🔮", label: "First Rare", done: counts.rare + counts.epic + counts.legendary + counts.mythic >= 1 },
+    { icon: "⚡", label: "First Epic", done: counts.epic + counts.legendary + counts.mythic >= 1 },
+    { icon: "👑", label: "First Legendary", done: counts.legendary + counts.mythic >= 1 },
+    { icon: "🔴", label: "First Mythic", done: counts.mythic >= 1 },
+    { icon: "📦", label: "100 Pulls", done: total >= 100 },
+    { icon: "🌟", label: "3 Legendaries", done: counts.legendary + counts.mythic >= 3 },
+    { icon: "🗝️", label: "All Rarities", done: Object.values(counts).every(v => v > 0) },
+  ];
+
+  body.innerHTML = `
+    <div class="sum-stats">
+      <div class="sum-stat"><div class="sum-stat-val">${total}</div><div class="sum-stat-label">Total Pulls</div></div>
+      <div class="sum-stat"><div class="sum-stat-val">${Object.keys(collection).length}</div><div class="sum-stat-label">Unique Items</div></div>
+      <div class="sum-stat"><div class="sum-stat-val rarity-legendary">${counts.legendary}</div><div class="sum-stat-label">Legendary</div></div>
+      <div class="sum-stat"><div class="sum-stat-val rarity-mythic">${counts.mythic}</div><div class="sum-stat-label">Mythic</div></div>
+    </div>
+    <div>
+      <div class="sum-section-title">Rarity Breakdown</div>
+      <div class="sum-bars">
+        ${["mythic", "legendary", "epic", "rare", "common"].map(r => `
+          <div class="sum-bar-row">
+            <span class="sum-bar-label ${rarityClass(r)}">${rarityLabel(r)}</span>
+            <div class="sum-bar-track"><div class="sum-bar-fill ${rarityClass(r)}" style="width:${barPct(r)}%"></div></div>
+            <span class="sum-bar-count">${counts[r]}</span>
+          </div>`).join("")}
+      </div>
+    </div>
+    ${bestEntry ? `
+      <div>
+        <div class="sum-section-title">Best Pull</div>
+        <div class="sum-best">
+          <span class="sum-best-icon ${rarityClass(bestEntry.rarity)}">${bestEntry.icon}</span>
+          <div class="sum-best-info">
+            <div class="sum-best-name">${bestEntry.name}</div>
+            <div class="sum-best-rarity ${rarityClass(bestEntry.rarity)}">${rarityLabel(bestEntry.rarity)}</div>
+            <div class="sum-best-pull">Obtained ×${bestEntry.count}</div>
+          </div>
+        </div>
+      </div>` : ""}
+    <div>
+      <div class="sum-section-title">Milestones</div>
+      <div class="sum-milestones">
+        ${milestones.map(m => `
+          <div class="sum-milestone${m.done ? "" : " locked"}">
+            <span class="sum-milestone-icon">${m.icon}</span>
+            <span>${m.label}</span>
+            ${m.done ? '<span class="sum-milestone-check">✦</span>' : ""}
+          </div>`).join("")}
+      </div>
+    </div>`;
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    body.querySelectorAll(".sum-bar-fill").forEach(el => {
+      const target = el.style.width;
+      el.style.width = "0%";
+      requestAnimationFrame(() => { el.style.width = target; });
+    });
+  }));
+}
+
+function roll() {
+  pity++;
+  if (pity >= PITY_THRESHOLD) {
+    SFX.pityFanfare();
+    pity = 0;
+    return "legendary";
+  }
+  if (pity === Math.floor(PITY_THRESHOLD * .8) && pity !== pitySoundedAt) {
+    pitySoundedAt = pity;
+    tone(440, "sine", .06, 0, .12);
+    tone(554, "sine", .05, .1, .12);
+  }
+  const r = Math.random();
+  if (r < RATES.mythic) { pity = 0; return "mythic"; }
+  if (r < RATES.mythic + RATES.legendary) { pity = 0; return "legendary"; }
+  if (r < RATES.mythic + RATES.legendary + RATES.epic) return "epic";
+  if (r < RATES.mythic + RATES.legendary + RATES.epic + RATES.rare) return "rare";
+  return "common";
+}
+
+function pickItem(rarity) {
+  const pool = [...ITEMS[rarity]];
+  const rateUp = BANNERS[activeBanner].rateUp;
+  if (rateUp && rarity === "mythic") {
+    const featured = pool.find(item => item.name === rateUp);
+    if (featured && Math.random() < .5) return featured;
+  }
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function buildMiniCard(id) {
+  return `
+    <div class="mini-card" id="mc-wrap-${id}">
+      <div class="card-inner" id="mc-${id}">
+        <div class="card-face card-back"><span class="emblem">✦</span></div>
+        <div class="card-face card-front" id="mcf-${id}">
+          <div class="rarity-glow" id="mcg-${id}"></div>
+          <div class="item-icon" id="mci-${id}"></div>
+          <div class="item-name" id="mcn-${id}"></div>
+          <div class="rarity-tag" id="mct-${id}"></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function fillMiniCard(id, rarity, item) {
+  const cls = rarityClass(rarity);
+  const glow = $("mcg-" + id);
+  glow.className = `rarity-glow ${glowClass(rarity)}`;
+  const sc = shimmerClass(rarity);
+  if (sc) glow.classList.add(sc);
+  $("mcf-" + id).className = `card-face card-front ${cls}`;
+  $("mci-" + id).textContent = item.icon;
+  $("mci-" + id).className = `item-icon ${cls}`;
+  $("mcn-" + id).textContent = item.name;
+  $("mcn-" + id).className = `item-name ${cls}`;
+  $("mct-" + id).textContent = rarityLabel(rarity);
+  $("mct-" + id).className = `rarity-tag ${cls}`;
+}
+
+function revealSingle(card, front, rarity, item) {
+  front.className = `card-face card-front ${rarityClass(rarity)}`;
+  const glow = $("glow-single");
+  glow.className = `rarity-glow ${glowClass(rarity)}`;
+  const sc = shimmerClass(rarity);
+  if (sc) glow.classList.add(sc);
+  const cls = rarityClass(rarity);
+  $("icon-single").textContent = item.icon;
+  $("icon-single").className = `item-icon ${cls}`;
+  $("name-single").textContent = item.name;
+  $("name-single").className = `item-name ${cls}`;
+  $("tag-single").textContent = rarityLabel(rarity);
+  $("tag-single").className = `rarity-tag ${cls}`;
+
+  if (rarity === "legendary" || rarity === "mythic") {
+    triggerLegendaryAnimation($("stage-single"), rarity, () => { singleFlipped = true; finishPull(); });
+  } else {
+    setTimeout(() => {
+      SFX.flip(rarity);
+      card.classList.add("flipped");
+      singleFlipped = true;
+      setTimeout(() => SFX.reveal(rarity), 700);
+      setTimeout(finishPull, 1100);
+    }, 60);
+  }
+  addHistory(rarity, item);
+}
+
+function doSinglePullWith(rarity, item) {
+  const card = $("card-single");
+  const front = $("cf-single");
+  if (singleFlipped) {
+    card.classList.remove("flipped");
+    singleFlipped = false;
+    setTimeout(() => revealSingle(card, front, rarity, item), 500);
+  } else {
+    revealSingle(card, front, rarity, item);
+  }
+}
+
+function doTenPull() {
+  const results = [];
+  for (let i = 0; i < 10; i++) results.push({ rarity: roll(), item: null });
+  results.forEach(result => { result.item = pickItem(result.rarity); });
+  results.forEach(result => addHistory(result.rarity, result.item));
+  lastResults = results;
+  const grid = $("stage-multi");
+  grid.innerHTML = "";
+  for (let i = 0; i < 10; i++) {
+    grid.innerHTML += buildMiniCard(i);
+    fillMiniCard(i, results[i].rarity, results[i].item);
+  }
+  $("stage-single").style.display = "none";
+  grid.classList.add("active");
+  hideBanner();
+  runTenPullSequence(results, 0, () => {
+    const bestIdx = results.reduce((best, current, i) => RARITY_ORDER[current.rarity] > RARITY_ORDER[results[best].rarity] ? i : best, 0);
+    $("mc-wrap-" + bestIdx).classList.add("best-card");
+    showBanner(results[bestIdx].rarity, results[bestIdx].item);
+    SFX.bestBanner(results[bestIdx].rarity);
+    finishPull();
+  });
+}
+
+function runTenPullSequence(results, i, onAllDone) {
+  if (i >= results.length) {
+    onAllDone();
+    return;
+  }
+  const result = results[i];
+  if (result.rarity === "legendary" || result.rarity === "mythic") {
+    setTimeout(() => {
+      triggerLegendaryTenPull(i, result, () => setTimeout(() => runTenPullSequence(results, i + 1, onAllDone), 300));
+    }, i === 0 ? 200 : 0);
+  } else {
+    setTimeout(() => {
+      SFX.flip(result.rarity);
+      $("mc-" + i).classList.add("flipped");
+      setTimeout(() => SFX.reveal(result.rarity), 600);
+      setTimeout(() => runTenPullSequence(results, i + 1, onAllDone), 160);
+    }, i === 0 ? 200 : 0);
+  }
+}
+
+function doPull(n) {
+  if (pulling || pulls < n) return;
+  SFX.click();
+  pulling = true;
+  pulls -= n;
+  totalPulls += n;
+  if (n === 1) {
+    $("stage-multi").classList.remove("active");
+    $("stage-single").style.display = "";
+    hideBanner();
+    const rarity = roll();
+    const item = pickItem(rarity);
+    lastResults = [{ rarity, item }];
+    doSinglePullWith(rarity, item);
+  } else {
+    doTenPull();
+  }
+  updateCurrency();
+}
+
+function finishPull() {
+  pulling = false;
+  $("btn-export").disabled = !lastResults.length;
+  updateCurrency();
+  saveState();
+}
+
+function addPulls() {
+  const input = $("add-amount");
+  const n = parseInt(input.value, 10);
+  if (!n || n < 1) return;
+  pulls += n;
+  input.value = "";
+  SFX.addPulls();
+  updateCurrency();
+  saveState();
+}
+
+function updateCurrency() {
+  $("pulls-left").textContent = pulls;
+  updatePity();
+  $("btn-one").disabled = pulling || pulls < 1;
+  $("btn-ten").disabled = pulling || pulls < 10;
+}
+
+function updatePity() {
+  $("pity-count").textContent = `${pity} / ${PITY_THRESHOLD}`;
+  $("pity-bar").style.width = `${pity / PITY_THRESHOLD * 100}%`;
+  const pct = pity / PITY_THRESHOLD;
+  $("pity-bar").classList.remove("warn", "danger");
+  if (pct >= 1) $("pity-bar").classList.add("danger");
+  else if (pct >= .8) $("pity-bar").classList.add("warn");
+}
+
+function historyNode(rarity, item, pullLabel) {
+  const div = document.createElement("div");
+  div.className = "history-item";
+  div.dataset.icon = item.icon;
+  div.dataset.name = item.name;
+  div.dataset.rarity = rarity;
+  div.innerHTML = `
+    <span><span style="margin-right:9px">${item.icon}</span><span class="${rarityClass(rarity)}">${item.name}</span></span>
+    <span class="history-pull">${pullLabel}</span>`;
+  return div;
+}
+
+function addHistory(rarity, item) {
+  collectItem(rarity, item);
+  const hist = $("history");
+  hist.insertBefore(historyNode(rarity, item, `#${totalPulls}`), hist.firstChild);
+  while (hist.children.length > MAX_HISTORY) hist.lastElementChild.remove();
+  saveState();
+}
+
+function doReset() {
+  SFX.reset();
+  pulls = 100;
+  pity = 0;
+  totalPulls = 0;
+  totalCollected = 0;
+  pulling = false;
+  singleFlipped = false;
+  lastResults = [];
+  Object.keys(collection).forEach(k => delete collection[k]);
+  $("btn-export").disabled = true;
+  $("history").innerHTML = "";
+  $("card-single").classList.remove("flipped", "legendary-flip");
+  $("stage-multi").classList.remove("active");
+  $("stage-single").style.display = "";
+  hideBanner();
+  updateInvBadge();
+  updateCurrency();
+  clearInventoryBody();
+  $("inv-empty").style.display = "block";
+  try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+}
+
+function showBanner(rarity, item) {
+  const banner = $("best-banner");
+  banner.textContent = `${item.icon}  ${item.name}  ·  ${rarityLabel(rarity)}`;
+  banner.className = `best-banner visible ${rarityClass(rarity)}`;
+}
+
+function hideBanner() {
+  $("best-banner").className = "best-banner";
+}
+
+function triggerLegendaryAnimation(cardEl, rarity, onComplete) {
+  const flash = $("leg-flash");
+  const dim = $("leg-dim");
+  const canvas = $("leg-canvas");
+  const ctx2d = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  cardEl.classList.add("leg-spotlight");
+  SFX.legendaryBuild();
+  setTimeout(() => {
+    flash.classList.add("on");
+    setTimeout(() => flash.classList.remove("on"), 180);
+    dim.classList.add("on");
+    canvas.classList.add("on");
+    launchParticles(ctx2d, canvas, rarity);
+    cardEl.querySelector(".card-inner").classList.add("legendary-flip");
+    setTimeout(() => {
+      cardEl.querySelector(".card-inner").classList.add("flipped");
+      setTimeout(() => {
+        SFX.reveal(rarity);
+        setTimeout(() => {
+          dim.classList.remove("on");
+          canvas.classList.remove("on");
+          cardEl.classList.remove("leg-spotlight");
+          cardEl.querySelector(".card-inner").classList.remove("legendary-flip");
+          ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+          if (onComplete) onComplete();
+        }, 1800);
+      }, 800);
+    }, 300);
+  }, 600);
+}
+
+function triggerLegendaryTenPull(cardIdx, result, onDismiss) {
+  const wrapEl = $("mc-wrap-" + cardIdx);
+  const cardEl = $("mc-" + cardIdx);
+  const flash = $("leg-flash");
+  const dim = $("leg-dim");
+  const canvas = $("leg-canvas");
+  const ctx2d = canvas.getContext("2d");
+  const prompt = $("leg-tap-prompt");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const srcRect = wrapEl.getBoundingClientRect();
+  const targetW = Math.min(220, window.innerWidth * .55);
+  const targetH = targetW * 1.5;
+  const targetL = (window.innerWidth - targetW) / 2;
+  const targetT = (window.innerHeight - targetH) / 2;
+  const color = getComputedStyle(document.documentElement).getPropertyValue(`--${result.rarity}`).trim();
+  const clone = document.createElement("div");
+  clone.className = "leg-float-card";
+  clone.style.cssText = `top:${srcRect.top}px;left:${srcRect.left}px;width:${srcRect.width}px;height:${srcRect.height}px;overflow:hidden;`;
+  const backFace = document.createElement("div");
+  backFace.style.cssText = `
+    position:absolute;inset:0;border-radius:12px;background:var(--panel2);border:1px solid var(--border2);
+    display:flex;align-items:center;justify-content:center;transition:opacity .35s ease;
+    background-image:repeating-linear-gradient(45deg,rgba(201,168,76,.025) 0,rgba(201,168,76,.025) 1px,transparent 1px,transparent 14px),
+    repeating-linear-gradient(-45deg,rgba(201,168,76,.025) 0,rgba(201,168,76,.025) 1px,transparent 1px,transparent 14px);`;
+  backFace.innerHTML = `<span style="font-family:'Cinzel Decorative',cursive;font-size:2rem;color:rgba(201,168,76,.2)">✦</span>`;
+  const frontFace = document.createElement("div");
+  frontFace.style.cssText = `
+    position:absolute;inset:0;border-radius:12px;background:var(--panel2);border:1px solid ${color};
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;overflow:hidden;
+    opacity:0;transition:opacity .4s ease;`;
+  frontFace.innerHTML = `
+    <div style="position:absolute;inset:0;border-radius:12px;background:radial-gradient(ellipse at 50% 110%,${color}44 0%,transparent 65%);pointer-events:none"></div>
+    <div style="position:absolute;inset:0;border-radius:12px;background:linear-gradient(105deg,transparent 35%,${color}33 50%,transparent 65%);background-size:250% auto;animation:shimmer 2.2s linear infinite;pointer-events:none"></div>
+    <div style="font-size:3.2rem;position:relative;z-index:1;filter:drop-shadow(0 0 12px ${color})">${result.item.icon}</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:600;letter-spacing:.12em;color:${color};position:relative;z-index:1;text-align:center;padding:0 12px">${result.item.name}</div>
+    <div style="font-size:.58rem;letter-spacing:.25em;text-transform:uppercase;padding:4px 14px;border-radius:999px;border:1px solid ${color};color:${color};position:relative;z-index:1">${rarityLabel(result.rarity)}</div>`;
+  clone.appendChild(backFace);
+  clone.appendChild(frontFace);
+  document.body.appendChild(clone);
+  wrapEl.style.visibility = "hidden";
+  dim.classList.add("on");
+  requestAnimationFrame(() => {
+    clone.classList.add("expanding");
+    requestAnimationFrame(() => {
+      clone.style.top = `${targetT}px`;
+      clone.style.left = `${targetL}px`;
+      clone.style.width = `${targetW}px`;
+      clone.style.height = `${targetH}px`;
+    });
+  });
+  setTimeout(() => {
+    SFX.legendaryBuild();
+    setTimeout(() => {
+      flash.classList.add("on");
+      setTimeout(() => flash.classList.remove("on"), 180);
+      canvas.classList.add("on");
+      launchParticles(ctx2d, canvas, result.rarity);
+      backFace.style.opacity = "0";
+      frontFace.style.opacity = "1";
+      setTimeout(() => SFX.reveal(result.rarity), 900);
+      setTimeout(() => {
+        prompt.classList.add("visible");
+        dim.style.pointerEvents = "all";
+        dim.style.cursor = "pointer";
+        const dismiss = () => {
+          dim.removeEventListener("click", dismiss);
+          dim.style.pointerEvents = "";
+          dim.style.cursor = "";
+          prompt.classList.remove("visible");
+          canvas.classList.remove("on");
+          ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+          cardEl.classList.add("flipped");
+          wrapEl.style.visibility = "";
+          const endRect = wrapEl.getBoundingClientRect();
+          clone.classList.remove("expanding");
+          clone.classList.add("shrinking");
+          clone.style.opacity = "0";
+          clone.style.top = `${endRect.top}px`;
+          clone.style.left = `${endRect.left}px`;
+          clone.style.width = `${endRect.width}px`;
+          clone.style.height = `${endRect.height}px`;
+          dim.classList.remove("on");
+          setTimeout(() => { clone.remove(); onDismiss(); }, 420);
+        };
+        dim.addEventListener("click", dismiss);
+      }, 1800);
+    }, 600);
+  }, 500);
+}
+
+function launchParticles(ctx2d, canvas, rarity = "legendary") {
+  const W = canvas.width;
+  const H = canvas.height;
+  const cx = W / 2;
+  const cy = H * .55;
+  const palette = rarity === "mythic"
+    ? ["#ef4444", "#fca5a5", "#fee2e2", "#f97316", "#c084fc", "#fff7ed"]
+    : ["#f97316", "#fbbf24", "#fed7aa", "#fff7ed", "#c084fc", "#fde68a"];
+  const particles = [];
+  for (let i = 0; i < 80; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 2 + Math.random() * 6;
+    particles.push({
+      x: cx, y: cy,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 3,
+      size: 2 + Math.random() * 4,
+      color: palette[Math.floor(Math.random() * palette.length)],
+      life: 1,
+      decay: .012 + Math.random() * .018,
+      rotation: Math.random() * Math.PI * 2,
+      spin: (Math.random() - .5) * .2,
+      type: Math.random() > .5 ? "circle" : "star",
+    });
+  }
+  let frame;
+  function draw() {
+    ctx2d.clearRect(0, 0, W, H);
+    let alive = false;
+    particles.forEach(p => {
+      if (p.life <= 0) return;
+      alive = true;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += .12;
+      p.vx *= .98;
+      p.life -= p.decay;
+      p.rotation += p.spin;
+      ctx2d.save();
+      ctx2d.globalAlpha = Math.max(0, p.life);
+      ctx2d.translate(p.x, p.y);
+      ctx2d.rotate(p.rotation);
+      ctx2d.fillStyle = p.color;
+      if (p.type === "star") drawStar(ctx2d, 0, 0, p.size * .5, p.size, 4);
+      else {
+        ctx2d.beginPath();
+        ctx2d.arc(0, 0, p.size, 0, Math.PI * 2);
+        ctx2d.fill();
+      }
+      ctx2d.restore();
+    });
+    if (alive) frame = requestAnimationFrame(draw);
+  }
+  draw();
+  setTimeout(() => cancelAnimationFrame(frame), 3000);
+}
+
+function drawStar(ctx2d, x, y, r1, r2, pts) {
+  ctx2d.beginPath();
+  for (let i = 0; i < pts * 2; i++) {
+    const r = i % 2 === 0 ? r2 : r1;
+    const a = i / (pts * 2) * Math.PI * 2 - Math.PI / 2;
+    if (i === 0) ctx2d.moveTo(x + r * Math.cos(a), y + r * Math.sin(a));
+    else ctx2d.lineTo(x + r * Math.cos(a), y + r * Math.sin(a));
+  }
+  ctx2d.closePath();
+  ctx2d.fill();
+}
+
+function openExport() {
+  if (!lastResults.length) return;
+  SFX.click();
+  renderExportCard(lastResults);
+  $("exp-overlay").classList.add("open");
+  $("exp-panel").classList.add("open");
+  setNotice("");
+}
+
+function closeExport() {
+  SFX.click();
+  $("exp-overlay").classList.remove("open");
+  $("exp-panel").classList.remove("open");
+}
+
+function renderExportCard(results) {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  const textColors = { common: "#d4d0c8", rare: "#5eb4ff", epic: "#c084fc", legendary: "#f97316", mythic: "#ef4444" };
+  const glowColors = { common: "rgba(212,208,200,.06)", rare: "rgba(94,180,255,.12)", epic: "rgba(192,132,252,.16)", legendary: "rgba(249,115,22,.22)", mythic: "rgba(239,68,68,.30)" };
+  const borderColors = { common: "rgba(212,208,200,.15)", rare: "rgba(94,180,255,.25)", epic: "rgba(192,132,252,.3)", legendary: "rgba(249,115,22,.4)", mythic: "rgba(239,68,68,.55)" };
+  const miniCards = results.map(result => `
+    <div class="exp-mini" style="border-color:${borderColors[result.rarity]}">
+      <div class="exp-mini-glow" style="background:radial-gradient(ellipse at 50% 110%,${glowColors[result.rarity]} 0%,transparent 70%)"></div>
+      <div class="exp-mini-icon">${result.item.icon}</div>
+      <div class="exp-mini-tag" style="color:${textColors[result.rarity]}">${rarityLabel(result.rarity).slice(0, 3)}</div>
+    </div>`).join("");
+  const best = results.reduce((bestResult, current) => RARITY_ORDER[current.rarity] > RARITY_ORDER[bestResult.rarity] ? current : bestResult, results[0]);
+  $("exp-card").innerHTML = `
+    <div class="exp-card-header">
+      <div class="exp-card-title">AETHERIS</div>
+      <div class="exp-card-sub">✦ &nbsp; Summoning Gate &nbsp; ✦</div>
+    </div>
+    <div class="exp-divider"></div>
+    ${results.length === 1 ? `
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 0">
+        <div style="font-size:3rem;filter:drop-shadow(0 0 12px ${textColors[results[0].rarity]})">${results[0].item.icon}</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;letter-spacing:.1em;color:${textColors[results[0].rarity]}">${results[0].item.name}</div>
+        <div style="font-size:.55rem;letter-spacing:.25em;text-transform:uppercase;padding:3px 12px;border-radius:999px;border:1px solid ${textColors[results[0].rarity]};color:${textColors[results[0].rarity]}">${rarityLabel(results[0].rarity)}</div>
+      </div>` : `
+      <div class="exp-grid">${miniCards}</div>
+      <div style="text-align:center;margin-bottom:8px">
+        <span style="font-size:.6rem;letter-spacing:.1em;color:#444">Best: </span>
+        <span style="font-size:.7rem;letter-spacing:.08em;color:${textColors[best.rarity]}">${best.item.icon} ${best.item.name}</span>
+      </div>`}
+    <div class="exp-divider"></div>
+    <div class="exp-footer">
+      <span>Pull #${totalPulls}</span>
+      <span>${dateStr}</span>
+    </div>`;
+}
+
+async function getExportCanvas() {
+  if (!window.html2canvas) throw new Error("html2canvas unavailable");
+  return html2canvas($("exp-card"), {
+    backgroundColor: "#07070f",
+    scale: 2,
+    useCORS: true,
+    logging: false,
+  });
+}
+
+async function doSaveImage() {
+  setNotice("Rendering…");
+  try {
+    const canvas = await getExportCanvas();
+    const url = canvas.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "aetheris-pull.png";
+    a.target = "_blank";
+    a.click();
+    setNotice("Image opened — long-press to save on iOS.");
+  } catch (e) {
+    setNotice("Could not render image. Try Copy Text instead.");
+  }
+}
+
+async function doShareImage() {
+  setNotice("Preparing…");
+  try {
+    const canvas = await getExportCanvas();
+    canvas.toBlob(async blob => {
+      const file = new File([blob], "aetheris-pull.png", { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: "Aetheris Pull" });
+        setNotice("");
+      } else {
+        const url = URL.createObjectURL(blob);
+        window.open(url, "_blank");
+        setNotice("Share sheet unavailable — image opened instead.");
+      }
+    }, "image/png");
+  } catch (e) {
+    if (e.name !== "AbortError") setNotice("Could not share. Try Save or Copy Text.");
+  }
+}
+
+function doCopyText() {
+  const lines = lastResults.map(result => `${result.item.icon} ${result.item.name} · ${rarityLabel(result.rarity)}`);
+  const best = lastResults.reduce((bestResult, current) => RARITY_ORDER[current.rarity] > RARITY_ORDER[bestResult.rarity] ? current : bestResult, lastResults[0]);
+  const text = [
+    "✦ AETHERIS — Summoning Gate",
+    `Pull #${totalPulls}`,
+    "",
+    ...lines,
+    "",
+    `Best: ${best.item.icon} ${best.item.name} · ${rarityLabel(best.rarity)}`,
+  ].join("\n");
+  navigator.clipboard.writeText(text)
+    .then(() => setNotice("Copied to clipboard!"))
+    .catch(() => setNotice("Copy failed — try selecting the card text manually."));
+}
+
+function setNotice(msg) {
+  $("exp-notice").textContent = msg;
+}
+
+loadState();
+updateInvBadge();
+updateCurrency();
+</script>
+</body>
+</html>
