@@ -626,7 +626,7 @@ h1 {
 .card-inner.flipped .card-new-badge.visible { opacity: 1; transform: none; }
 .stage-single .card-new-badge { top: 12px; left: 12px; font-size: .72rem; padding: 5px 11px; }
 
-.inv-overlay, .sum-overlay, .info-overlay, .exp-overlay {
+.inv-overlay, .sum-overlay, .info-overlay, .detail-overlay, .exp-overlay {
   position: fixed;
   inset: 0;
   z-index: 10;
@@ -638,9 +638,10 @@ h1 {
 }
 .sum-overlay { z-index: 12; }
 .info-overlay { z-index: 14; }
+.detail-overlay { z-index: 22; }
 .exp-overlay { z-index: 20; background: rgba(0,0,0,.8); backdrop-filter: blur(6px); }
-.inv-overlay.open, .sum-overlay.open, .info-overlay.open, .exp-overlay.open { opacity: 1; pointer-events: all; }
-.inv-panel, .sum-panel, .info-panel, .exp-panel {
+.inv-overlay.open, .sum-overlay.open, .info-overlay.open, .detail-overlay.open, .exp-overlay.open { opacity: 1; pointer-events: all; }
+.inv-panel, .sum-panel, .info-panel, .detail-panel, .exp-panel {
   position: fixed;
   left: 0;
   right: 0;
@@ -659,8 +660,9 @@ h1 {
 }
 .sum-panel { z-index: 13; max-height: 88vh; background: #09090f; }
 .info-panel { z-index: 15; max-height: 90vh; background: #09090f; }
+.detail-panel { z-index: 23; max-height: 84vh; background: #09090f; }
 .exp-panel { z-index: 21; max-height: 92vh; background: #09090f; }
-.inv-panel.open, .sum-panel.open, .info-panel.open, .exp-panel.open { transform: translateY(0); }
+.inv-panel.open, .sum-panel.open, .info-panel.open, .detail-panel.open, .exp-panel.open { transform: translateY(0); }
 .inv-handle {
   flex-shrink: 0;
   width: 32px;
@@ -669,7 +671,7 @@ h1 {
   border-radius: 2px;
   background: var(--border2);
 }
-.inv-header, .sum-header, .info-header, .exp-header {
+.inv-header, .sum-header, .info-header, .detail-header, .exp-header {
   display: flex;
   flex-shrink: 0;
   align-items: center;
@@ -782,6 +784,7 @@ h1 {
   transition: border-color .2s, background .2s;
 }
 .inv-item:hover, .cdx-item:hover { background: var(--panel2); }
+.inv-item, .cdx-item { cursor: pointer; }
 .inv-item-icon, .cdx-item-icon { font-size: 1.6rem; line-height: 1; }
 .inv-item-name, .cdx-item-name {
   font: 600 .86rem/1.25 "Cormorant Garamond", serif;
@@ -827,7 +830,7 @@ h1 {
   text-align: center;
 }
 
-.sum-body, .info-body {
+.sum-body, .info-body, .detail-body {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -872,6 +875,23 @@ h1 {
 .info-pool-title { display: flex; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; }
 .info-pool-items { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; }
 .info-pool-chip { padding: 6px 8px; border-radius: 999px; background: rgba(255,255,255,.04); font: .82rem "Cormorant Garamond", serif; color: var(--text-hi); }
+.detail-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 18px;
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  background: var(--panel);
+  text-align: center;
+}
+.detail-icon { font-size: 4rem; filter: drop-shadow(0 0 12px currentColor); }
+.detail-icon.locked { filter: blur(4px) grayscale(.8); opacity: .65; }
+.detail-name { color: var(--text-hi); font: 700 1.25rem "Cormorant Garamond", serif; letter-spacing: .08em; }
+.detail-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.detail-chip { padding: 6px 10px; border: 1px solid var(--border2); border-radius: 999px; background: rgba(255,255,255,.035); font-size: .76rem; letter-spacing: .12em; text-transform: uppercase; }
+.detail-flavor { color: #9b9588; font: italic 1rem "Cormorant Garamond", serif; line-height: 1.45; }
 .sum-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .sum-stat {
   display: flex;
@@ -1110,7 +1130,7 @@ h1 {
 .inv-item-count { font-size: .9rem; }
 .cdx-check { font-size: .86rem; }
 .cdx-item.locked .cdx-item-icon { filter: blur(3px) grayscale(.8); }
-.sum-body, .info-body { font-size: 1rem; }
+.sum-body, .info-body, .detail-body { font-size: 1rem; }
 .sum-section-title { font-size: .76rem; }
 .sum-stat-label { font-size: .62rem; }
 .sum-best-rarity, .sum-best-pull { font-size: .76rem; }
@@ -1324,6 +1344,16 @@ h1 {
   <div class="info-body" id="info-body"></div>
 </div>
 
+<div class="detail-overlay" id="detail-overlay" onclick="closeItemDetail()"></div>
+<div class="detail-panel" id="detail-panel">
+  <div class="inv-handle"></div>
+  <div class="detail-header">
+    <span class="inv-title">Item Detail</span>
+    <button class="inv-close" onclick="closeItemDetail()">✕</button>
+  </div>
+  <div class="detail-body" id="detail-body"></div>
+</div>
+
 <div class="exp-overlay" id="exp-overlay" onclick="closeExport()"></div>
 <div class="exp-panel" id="exp-panel">
   <div class="inv-handle"></div>
@@ -1351,7 +1381,7 @@ const RARITY_ORDER = { common: 0, rare: 1, epic: 2, legendary: 3, mythic: 4 };
 const RATES = { mythic: .0002, legendary: .02, epic: .08, rare: .20, common: .6998 };
 
 const BANNERS = [
-  { id: "aetheris", name: "Aetheris", shortName: "Aetheris", accent: "#c9a84c", pool: "exclusive", rateUp: null, guaranteeTen: null, rule: "Standard summoning pool with shared 50-pull Legendary pity." },
+  { id: "aetheris", name: "Aetheris", shortName: "Aetheris", accent: "#c9a84c", pool: "exclusive", rateUp: null, guaranteeTen: null, rule: "Standard summoning pool with its own 50-pull Legendary pity." },
   { id: "sunken", name: "The Sunken Archive", shortName: "Sunken", accent: "#2dd4bf", pool: "exclusive", rateUp: "The Drowned God", guaranteeTen: null, rule: "Exclusive archive pool. Mythic pulls have a 50% featured chance for The Drowned God." },
   { id: "clockwork", name: "Clockwork Dominion", shortName: "Clockwork", accent: "#d6a35b", pool: "exclusive", rateUp: null, guaranteeTen: "legendary", rule: "Exclusive dominion pool. Every 10-pull guarantees at least one Legendary-or-better result." },
 ];
@@ -1517,7 +1547,7 @@ const CATALOG_ITEMS = Object.entries(ITEM_SETS).flatMap(([banner, set]) =>
 );
 
 let pulls = 100;
-let pity = 0;
+let pityByBanner = makeBannerState(0);
 let totalPulls = 0;
 let totalCollected = 0;
 let singleFlipped = false;
@@ -1526,7 +1556,7 @@ let activeBanner = 0;
 let activeTab = "collection";
 let activeInvBannerFilter = "all";
 let lastResults = [];
-let pitySoundedAt = -1;
+let pitySoundedAtByBanner = makeBannerState(-1);
 let audioContext = null;
 
 const $ = id => document.getElementById(id);
@@ -1535,8 +1565,29 @@ const rarityLabel = r => r.charAt(0).toUpperCase() + r.slice(1);
 const glowClass = r => `glow-${r}`;
 const shimmerClass = r => r === "mythic" ? "mythic-shimmer" : r === "legendary" ? "legendary-shimmer" : r === "epic" ? "epic-shimmer" : "";
 
+function makeBannerState(defaultValue) {
+  return Object.fromEntries(BANNERS.map(banner => [banner.id, defaultValue]));
+}
+
 function getActiveBanner() {
   return BANNERS[activeBanner] || BANNERS[0];
+}
+
+function getActiveBannerId() {
+  return getActiveBanner().id;
+}
+
+function getPity(bannerId = getActiveBannerId()) {
+  return pityByBanner[bannerId] ?? 0;
+}
+
+function setPity(value, bannerId = getActiveBannerId()) {
+  pityByBanner[bannerId] = value;
+}
+
+function resetPityState() {
+  pityByBanner = makeBannerState(0);
+  pitySoundedAtByBanner = makeBannerState(-1);
 }
 
 function getBannerById(id) {
@@ -1660,6 +1711,7 @@ function selectBanner(index, playSound = true) {
   $("odds-legendary").textContent = banner.guaranteeTen === "legendary"
     ? "2% · guaranteed in every 10-pull"
     : "2% · guaranteed at 50";
+  updatePity();
   if (playSound) SFX.click();
   saveState();
 }
@@ -1675,7 +1727,8 @@ function saveState() {
     }));
     localStorage.setItem(SAVE_KEY, JSON.stringify({
       pulls,
-      pity,
+      pity: getPity(),
+      pityByBanner,
       totalPulls,
       totalCollected,
       activeBanner,
@@ -1692,11 +1745,17 @@ function loadState() {
     if (!raw) return;
     const state = JSON.parse(raw);
     pulls = state.pulls ?? 100;
-    pity = state.pity ?? 0;
     totalPulls = state.totalPulls ?? 0;
     totalCollected = state.totalCollected ?? 0;
     activeBanner = state.activeBanner ?? 0;
     activeInvBannerFilter = state.activeInvBannerFilter ?? "all";
+    resetPityState();
+    if (state.pityByBanner) {
+      Object.assign(pityByBanner, state.pityByBanner);
+    } else {
+      const migratedBanner = getActiveBanner().id;
+      pityByBanner[migratedBanner] = state.pity ?? 0;
+    }
     Object.keys(collection).forEach(k => delete collection[k]);
     if (state.collection) Object.assign(collection, state.collection);
     Object.entries(collection).forEach(([name, data]) => {
@@ -1732,6 +1791,42 @@ function collectItem(rarity, item) {
 
 function updateInvBadge() {
   $("inv-badge").textContent = Object.keys(collection).length;
+}
+
+function itemFlavor(item, owned) {
+  if (!owned) return `An undiscovered ${rarityLabel(item.rarity)} relic from ${bannerLabel(item.banner)}.`;
+  const source = bannerLabel(item.banner);
+  if (item.banner === "sunken") return `${item.name} carries the pressure and hush of the drowned archive.`;
+  if (item.banner === "clockwork") return `${item.name} hums with brasswork precision from the Clockwork Dominion.`;
+  return `${item.name} resonates with the old magic of Aetheris.`;
+}
+
+function openItemDetail(name) {
+  const item = findItemMeta(name);
+  if (!item) return;
+  const owned = collection[name];
+  const discovered = Boolean(owned);
+  const displayName = discovered ? item.name : `Undiscovered ${rarityLabel(item.rarity)}`;
+  const displayIcon = discovered ? item.icon : "✦";
+  $("detail-body").innerHTML = `
+    <div class="detail-card">
+      <div class="detail-icon ${discovered ? rarityClass(item.rarity) : "locked"}">${displayIcon}</div>
+      <div class="detail-name">${displayName}</div>
+      <div class="detail-meta">
+        <span class="detail-chip ${rarityClass(item.rarity)}">${rarityLabel(item.rarity)}</span>
+        <span class="detail-chip">${bannerLabel(item.banner)}</span>
+        <span class="detail-chip">${discovered ? `Owned ×${owned.count}` : "Locked"}</span>
+      </div>
+      <div class="detail-flavor">${itemFlavor(item, discovered)}</div>
+    </div>`;
+  $("detail-overlay").classList.add("open");
+  $("detail-panel").classList.add("open");
+}
+
+function closeItemDetail() {
+  SFX.click();
+  $("detail-overlay").classList.remove("open");
+  $("detail-panel").classList.remove("open");
 }
 
 function clearInventoryBody() {
@@ -1905,6 +2000,7 @@ function renderInv() {
         <span class="inv-item-icon">${data.icon}</span>
         <span class="inv-item-name ${rarityClass(tier)}">${name}</span>
         <span class="inv-item-source">${bannerLabel(banner)}</span>`;
+      div.addEventListener("click", () => openItemDetail(name));
       grid.appendChild(div);
     });
     $("inv-body").appendChild(tierEl);
@@ -1951,6 +2047,7 @@ function renderCodex() {
         <span class="cdx-item-name ${owned ? rarityClass(tier) : ""}">${owned ? item.name : "???"}</span>
         <span class="inv-item-source">${bannerLabel(item.banner)}</span>
         ${owned && owned.count > 1 ? `<span style="position:absolute;top:5px;left:7px;font-size:.45rem;color:#666;font-family:'Cormorant Garamond',serif">×${owned.count}</span>` : ""}`;
+      div.addEventListener("click", () => openItemDetail(item.name));
       grid.appendChild(div);
     });
     $("inv-body").appendChild(tierEl);
@@ -2047,20 +2144,22 @@ function renderSummary() {
 }
 
 function roll() {
-  pity++;
-  if (pity >= PITY_THRESHOLD) {
+  const bannerId = getActiveBannerId();
+  const nextPity = getPity(bannerId) + 1;
+  setPity(nextPity, bannerId);
+  if (nextPity >= PITY_THRESHOLD) {
     SFX.pityFanfare();
-    pity = 0;
+    setPity(0, bannerId);
     return "legendary";
   }
-  if (pity === Math.floor(PITY_THRESHOLD * .8) && pity !== pitySoundedAt) {
-    pitySoundedAt = pity;
+  if (nextPity === Math.floor(PITY_THRESHOLD * .8) && nextPity !== pitySoundedAtByBanner[bannerId]) {
+    pitySoundedAtByBanner[bannerId] = nextPity;
     tone(440, "sine", .06, 0, .12);
     tone(554, "sine", .05, .1, .12);
   }
   const r = Math.random();
-  if (r < RATES.mythic) { pity = 0; return "mythic"; }
-  if (r < RATES.mythic + RATES.legendary) { pity = 0; return "legendary"; }
+  if (r < RATES.mythic) { setPity(0, bannerId); return "mythic"; }
+  if (r < RATES.mythic + RATES.legendary) { setPity(0, bannerId); return "legendary"; }
   if (r < RATES.mythic + RATES.legendary + RATES.epic) return "epic";
   if (r < RATES.mythic + RATES.legendary + RATES.epic + RATES.rare) return "rare";
   return "common";
@@ -2081,7 +2180,7 @@ function rollTenPullResults() {
   for (let i = 0; i < 10; i++) results.push({ rarity: roll(), item: null });
   if (getActiveBanner().guaranteeTen === "legendary" && !results.some(result => RARITY_ORDER[result.rarity] >= RARITY_ORDER.legendary)) {
     results[Math.floor(Math.random() * results.length)].rarity = "legendary";
-    pity = 0;
+    setPity(0);
   }
   results.forEach(result => { result.item = pickItem(result.rarity); });
   return results;
@@ -2248,6 +2347,7 @@ function updateCurrency() {
 }
 
 function updatePity() {
+  const pity = getPity();
   $("pity-count").textContent = `${pity} / ${PITY_THRESHOLD}`;
   $("pity-bar").style.width = `${pity / PITY_THRESHOLD * 100}%`;
   const pct = pity / PITY_THRESHOLD;
@@ -2282,7 +2382,7 @@ function addHistory(rarity, item) {
 function doReset() {
   SFX.reset();
   pulls = 100;
-  pity = 0;
+  resetPityState();
   totalPulls = 0;
   totalCollected = 0;
   pulling = false;
