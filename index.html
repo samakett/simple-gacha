@@ -1239,7 +1239,7 @@ const RATES = { mythic: .0002, legendary: .02, epic: .08, rare: .20, common: .69
 
 const BANNERS = [
   { id: "aetheris", name: "Aetheris", shortName: "Aetheris", accent: "#c9a84c", pool: "exclusive", rateUp: null, guaranteeTen: null },
-  { id: "sunken", name: "The Sunken Archive", shortName: "Sunken", accent: "#2dd4bf", pool: "basePlusBanner", rateUp: "The Drowned God", guaranteeTen: null },
+  { id: "sunken", name: "The Sunken Archive", shortName: "Sunken", accent: "#2dd4bf", pool: "exclusive", rateUp: "The Drowned God", guaranteeTen: null },
   { id: "clockwork", name: "Clockwork Dominion", shortName: "Clockwork", accent: "#d6a35b", pool: "exclusive", rateUp: null, guaranteeTen: "legendary" },
 ];
 
@@ -1249,8 +1249,7 @@ const ITEMS = {
     { name: "Stone Amulet", icon: "🪨" }, { name: "Copper Ring", icon: "💍" },
     { name: "Tattered Cloak", icon: "🧥" }, { name: "Flint Dagger", icon: "🔪" },
     { name: "Hemp Rope", icon: "🪢" }, { name: "Worn Boots", icon: "👟" },
-    { name: "Canteen", icon: "🫙" }, { name: "Bone Charm", icon: "🦴" },
-    { name: "Field Lantern", icon: "🪔" }, { name: "River Stone", icon: "⚫" },
+    { name: "Bone Charm", icon: "🦴" }, { name: "Field Lantern", icon: "🪔" },
     { name: "Crude Bow", icon: "🏹" }, { name: "Peasant's Hat", icon: "🎩" },
     { name: "Tin Buckle", icon: "🔩" }, { name: "Whetstone", icon: "🪨" },
     { name: "Dried Herb", icon: "🌿" }, { name: "Cracked Orb", icon: "🔮" },
@@ -1258,17 +1257,16 @@ const ITEMS = {
   ],
   rare: [
     { name: "Silver Bow", icon: "🏹" }, { name: "Frost Dagger", icon: "🗡️" },
-    { name: "Tide Orb", icon: "🔮" }, { name: "Storm Boots", icon: "👢" },
-    { name: "Ember Flask", icon: "🔥" }, { name: "Shadow Mask", icon: "🎭" },
+    { name: "Storm Boots", icon: "👢" }, { name: "Ember Flask", icon: "🔥" },
+    { name: "Shadow Mask", icon: "🎭" },
     { name: "Runed Gauntlet", icon: "🥊" }, { name: "Verdant Seed", icon: "🌿" },
     { name: "Starfall Coin", icon: "🪙" }, { name: "Hollow Crown", icon: "👑" },
     { name: "Ashwood Wand", icon: "🪄" }, { name: "Gilded Compass", icon: "🧭" },
     { name: "Thornweave Net", icon: "🕸️" }, { name: "Runestone Shard", icon: "🪨" },
-    { name: "Mist Lantern", icon: "🪔" }, { name: "Serpent Band", icon: "🐍" },
   ],
   epic: [
     { name: "Voidweave Armor", icon: "⚔️" }, { name: "Lunar Grimoire", icon: "📖" },
-    { name: "Eclipse Blade", icon: "🌙" }, { name: "Abyssal Trident", icon: "🔱" },
+    { name: "Eclipse Blade", icon: "🌙" },
     { name: "Wraithbone Staff", icon: "🦷" }, { name: "Soulbound Mirror", icon: "🪞" },
     { name: "Tempest Core", icon: "⚡" }, { name: "Bloodstone Ring", icon: "💎" },
     { name: "Phantom Shroud", icon: "👻" }, { name: "Infernal Axe", icon: "🪓" },
@@ -1281,7 +1279,7 @@ const ITEMS = {
     { name: "Cosmic Shard", icon: "💫" }, { name: "Voidreaper", icon: "☄️" },
     { name: "Eye of Eternity", icon: "👁️" }, { name: "Celestial Codex", icon: "📜" },
     { name: "Sunforge Blade", icon: "🌟" }, { name: "Stormcaller's Fist", icon: "⛈️" },
-    { name: "Abyssal Heart", icon: "🖤" }, { name: "The Pale Throne", icon: "🪑" },
+    { name: "The Pale Throne", icon: "🪑" },
     { name: "Worldbreaker", icon: "🌍" },
   ],
   mythic: [
@@ -1294,12 +1292,49 @@ const ITEMS = {
 };
 
 const SUNKEN_ITEMS = {
-  common: [],
-  rare: [],
-  epic: [],
-  legendary: [],
+  common: [
+    { name: "Salt-Eaten Coin", icon: "🪙" }, { name: "Barnacle Shard", icon: "🪨" },
+    { name: "Kelp Cord", icon: "🪢" }, { name: "Cracked Conch", icon: "🐚" },
+    { name: "Silted Key", icon: "🗝️" }, { name: "Driftwood Charm", icon: "🪵" },
+    { name: "Tarnished Hook", icon: "🪝" }, { name: "Brine Vial", icon: "🧪" },
+    { name: "Pearl Chip", icon: "⚪" }, { name: "Waxed Chart", icon: "🗺️" },
+    { name: "Coral Button", icon: "🪸" }, { name: "Harpoon Splinter", icon: "🔱" },
+    { name: "Tideglass Bead", icon: "🔵" }, { name: "Seafoam Candle", icon: "🕯️" },
+    { name: "Broken Sextant", icon: "🧭" }, { name: "Flooded Page", icon: "📄" },
+    { name: "Shell Ring", icon: "💍" }, { name: "Anchor Nail", icon: "⚓" },
+  ],
+  rare: [
+    { name: "Undertide Orb", icon: "🔮" }, { name: "Lantern of the Drowned", icon: "🪔" },
+    { name: "Leviathan Scale", icon: "🐋" }, { name: "Black Coral Compass", icon: "🧭" },
+    { name: "Nacre Ward", icon: "🛡️" }, { name: "Siren's Needle", icon: "🪡" },
+    { name: "Reefglass Dagger", icon: "🗡️" }, { name: "Depthsound Bell", icon: "🔔" },
+    { name: "Moonpool Flask", icon: "🌙" }, { name: "Saltvein Band", icon: "💍" },
+    { name: "Grotto Map", icon: "🗺️" }, { name: "Kelpie Bridle", icon: "🐴" },
+    { name: "Pearl-Eye Mask", icon: "🎭" }, { name: "Whirlpool Charm", icon: "🌀" },
+    { name: "Brinemarked Gauntlet", icon: "🥊" }, { name: "Sunken Sextant", icon: "🧭" },
+    { name: "Coralbone Bow", icon: "🏹" }, { name: "Abyssal Inkstone", icon: "🖋️" },
+  ],
+  epic: [
+    { name: "Cathedral Anchor", icon: "⚓" }, { name: "Drowned Archive Key", icon: "🗝️" },
+    { name: "Leviathan's Psalm", icon: "📜" }, { name: "Trenchglass Mirror", icon: "🪞" },
+    { name: "Trench Trident", icon: "🔱" }, { name: "Memory of the Deep", icon: "🧠" },
+    { name: "Sirenbone Staff", icon: "🦴" }, { name: "Coral Crown Fragment", icon: "👑" },
+    { name: "Flood-Tome Grimoire", icon: "📖" }, { name: "Blackwater Compass", icon: "🧭" },
+    { name: "Pearlheart Ring", icon: "💎" }, { name: "Undertow Mantle", icon: "🧥" },
+    { name: "Ghost-Kelp Shroud", icon: "👻" }, { name: "Shipgrave Idol", icon: "🗿" },
+    { name: "Riptide Catalyst", icon: "🔯" }, { name: "Moonlit Diving Bell", icon: "🔔" },
+    { name: "Brinewraith Blade", icon: "⚔️" }, { name: "Oracle of the Reef", icon: "👁️" },
+  ],
+  legendary: [
+    { name: "The Salt Throne", icon: "🪑" }, { name: "Leviathan's Eye", icon: "👁️" },
+    { name: "Crown of Coral", icon: "👑" }, { name: "Archive Below", icon: "📚" },
+    { name: "Saint of Shipwrecks", icon: "⛵" }, { name: "Black Tide Harpoon", icon: "🔱" },
+    { name: "The Pearl Monolith", icon: "🗿" }, { name: "Cathedral of Tides", icon: "🏛️" },
+  ],
   mythic: [
     { name: "The Drowned God", icon: "🐚" },
+    { name: "Mother of Trenches", icon: "🦑" },
+    { name: "The Last Lighthouse", icon: "🗼" },
   ],
 };
 
