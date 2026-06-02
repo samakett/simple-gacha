@@ -17,6 +17,8 @@
   --legendary: #f97316;
   --mythic:    #ef4444;
   --gold:      #c9a84c;
+  --clockwork: #d6a35b;
+  --active-banner: var(--gold);
   --bg:        #07070f;
   --panel:     #0f0f1a;
   --panel2:    #141422;
@@ -140,6 +142,7 @@ h1 {
 }
 .banner-card.aetheris::before { background: radial-gradient(ellipse at 80% 50%, rgba(201,168,76,.5) 0%, transparent 70%); }
 .banner-card.sunken::before { background: radial-gradient(ellipse at 80% 50%, rgba(45,212,191,.5) 0%, transparent 70%); }
+.banner-card.clockwork::before { background: radial-gradient(ellipse at 80% 50%, rgba(214,163,91,.55) 0%, transparent 70%); }
 .banner-name {
   margin-bottom: 2px;
   font-family: "Cinzel Decorative", cursive;
@@ -148,6 +151,7 @@ h1 {
 }
 .banner-card.aetheris .banner-name { color: var(--gold); }
 .banner-card.sunken .banner-name { color: var(--teal); }
+.banner-card.clockwork .banner-name { color: var(--clockwork); }
 .banner-sub {
   color: #666;
   font-family: "Cormorant Garamond", serif;
@@ -165,6 +169,7 @@ h1 {
 }
 .banner-card.aetheris .banner-featured { color: var(--legendary); }
 .banner-card.sunken .banner-featured { color: var(--teal); }
+.banner-card.clockwork .banner-featured { color: var(--clockwork); }
 .banner-rateup {
   display: inline-block;
   margin-top: 3px;
@@ -177,6 +182,11 @@ h1 {
   letter-spacing: .15em;
   text-transform: uppercase;
 }
+.banner-card.clockwork .banner-rateup {
+  border-color: rgba(214,163,91,.28);
+  background: rgba(214,163,91,.12);
+  color: var(--clockwork);
+}
 .banner-dots { display: flex; justify-content: center; gap: 6px; margin-top: 8px; }
 .banner-dot {
   width: 5px;
@@ -185,7 +195,7 @@ h1 {
   background: #333;
   transition: background .2s, transform .2s;
 }
-.banner-dot.active { background: var(--gold); transform: scale(1.3); }
+.banner-dot.active { background: var(--active-banner); transform: scale(1.3); }
 
 .stage-single {
   width: 100%;
@@ -515,6 +525,7 @@ h1 {
   transition: width .5s cubic-bezier(.4,0,.2,1);
 }
 .pity-bar-fill.sunken { background: linear-gradient(90deg, #2dd4bf, #0d9488); }
+.pity-bar-fill.clockwork { background: linear-gradient(90deg, #d6a35b, #8b5a2b); }
 .pity-bar-fill.warn { animation: pityPulse 1.2s ease-in-out infinite; box-shadow: 0 0 10px rgba(249,115,22,.6); }
 .pity-bar-fill.danger {
   background: linear-gradient(90deg, #f97316, #fbbf24) !important;
@@ -672,7 +683,34 @@ h1 {
   transition: color .2s, border-color .2s;
 }
 .inv-tab:hover { color: #888; }
-.inv-tab.active { color: var(--text-hi); border-bottom-color: var(--gold); }
+.inv-tab.active { color: var(--text-hi); border-bottom-color: var(--active-banner); }
+.inv-filters {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 10px 18px 0;
+  flex-shrink: 0;
+}
+.inv-filter {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel);
+  color: #666;
+  cursor: pointer;
+  font: .52rem "Cinzel", serif;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  transition: color .2s, border-color .2s, background .2s;
+}
+.inv-filter:hover { color: #aaa; border-color: var(--border2); }
+.inv-filter.active { color: var(--text-hi); border-color: var(--active-banner); background: rgba(201,168,76,.06); }
+.inv-item-source {
+  color: #555;
+  font: italic .42rem "Cormorant Garamond", serif;
+  letter-spacing: .08em;
+}
 .inv-body {
   flex: 1;
   overflow-y: auto;
@@ -1058,10 +1096,16 @@ h1 {
           <div class="banner-sub">Rate-Up: <span class="banner-rateup">🐚 The Drowned God ×2</span></div>
           <div class="banner-featured">🌊</div>
         </div>
+        <div class="banner-card clockwork" onclick="selectBanner(2)">
+          <div class="banner-name">Clockwork Dominion</div>
+          <div class="banner-sub">Guaranteed: <span class="banner-rateup">⚙️ Legendary in every 10-pull</span></div>
+          <div class="banner-featured">⚙️</div>
+        </div>
       </div>
       <div class="banner-dots">
         <div class="banner-dot active" id="dot-0"></div>
         <div class="banner-dot" id="dot-1"></div>
+        <div class="banner-dot" id="dot-2"></div>
       </div>
     </div>
 
@@ -1146,6 +1190,12 @@ h1 {
     <button class="inv-tab active" id="tab-collection" onclick="switchTab('collection')">Collection</button>
     <button class="inv-tab" id="tab-codex" onclick="switchTab('codex')">Codex</button>
   </div>
+  <div class="inv-filters" id="inv-filters">
+    <button class="inv-filter active" data-banner-filter="all" onclick="switchBannerFilter('all')">All</button>
+    <button class="inv-filter" data-banner-filter="aetheris" onclick="switchBannerFilter('aetheris')">Aetheris</button>
+    <button class="inv-filter" data-banner-filter="sunken" onclick="switchBannerFilter('sunken')">Sunken</button>
+    <button class="inv-filter" data-banner-filter="clockwork" onclick="switchBannerFilter('clockwork')">Clockwork</button>
+  </div>
   <div class="inv-body" id="inv-body">
     <div class="inv-empty" id="inv-empty">No items yet. Begin summoning…</div>
   </div>
@@ -1188,8 +1238,9 @@ const RARITY_ORDER = { common: 0, rare: 1, epic: 2, legendary: 3, mythic: 4 };
 const RATES = { mythic: .0002, legendary: .02, epic: .08, rare: .20, common: .6998 };
 
 const BANNERS = [
-  { id: "aetheris", rateUp: null },
-  { id: "sunken", rateUp: "The Drowned God" },
+  { id: "aetheris", name: "Aetheris", shortName: "Aetheris", accent: "#c9a84c", pool: "exclusive", rateUp: null, guaranteeTen: null },
+  { id: "sunken", name: "The Sunken Archive", shortName: "Sunken", accent: "#2dd4bf", pool: "basePlusBanner", rateUp: "The Drowned God", guaranteeTen: null },
+  { id: "clockwork", name: "Clockwork Dominion", shortName: "Clockwork", accent: "#d6a35b", pool: "exclusive", rateUp: null, guaranteeTen: "legendary" },
 ];
 
 const ITEMS = {
@@ -1239,9 +1290,83 @@ const ITEMS = {
     { name: "Eternity's End", icon: "⏳" },
     { name: "Genesis Core", icon: "🌀" },
     { name: "The Fallen Star", icon: "💥" },
+  ],
+};
+
+const SUNKEN_ITEMS = {
+  common: [],
+  rare: [],
+  epic: [],
+  legendary: [],
+  mythic: [
     { name: "The Drowned God", icon: "🐚" },
   ],
 };
+
+const CLOCKWORK_ITEMS = {
+  common: [
+    { name: "Brass Cog", icon: "⚙️" }, { name: "Wound Spring", icon: "🌀" },
+    { name: "Sooted Gear", icon: "⚙️" }, { name: "Tinker's Screw", icon: "🔩" },
+    { name: "Copper Rivet", icon: "🟠" }, { name: "Oiled Rag", icon: "🧻" },
+    { name: "Cracked Dial", icon: "🕘" }, { name: "Tin Escapement", icon: "🔧" },
+    { name: "Pocket Key", icon: "🗝️" }, { name: "Iron Pendulum", icon: "⏱️" },
+    { name: "Gauge Needle", icon: "📍" }, { name: "Apprentice Lens", icon: "🔍" },
+    { name: "Workshop Token", icon: "🪙" }, { name: "Ratchet Strap", icon: "🔗" },
+    { name: "Boiler Bolt", icon: "🧱" }, { name: "Patina Plate", icon: "🛡️" },
+    { name: "Minute Pin", icon: "📌" }, { name: "Gearwright Glove", icon: "🧤" },
+    { name: "Dented Casing", icon: "📦" }, { name: "Coal Spark", icon: "✨" },
+  ],
+  rare: [
+    { name: "Sapphire Regulator", icon: "💙" }, { name: "Clockhand Rapier", icon: "🗡️" },
+    { name: "Steamwork Familiar", icon: "🐁" }, { name: "Jeweled Chronometer", icon: "⏱️" },
+    { name: "Aether Valve", icon: "🛞" }, { name: "Bronze Orrery", icon: "🪐" },
+    { name: "Whispering Metronome", icon: "🎚️" }, { name: "Gearbound Lantern", icon: "🪔" },
+    { name: "Timekeeper's Seal", icon: "🔏" }, { name: "Ironwood Gearstaff", icon: "🪄" },
+    { name: "Mercury Balance", icon: "⚖️" }, { name: "Pendulum Boots", icon: "👢" },
+    { name: "Brassbound Journal", icon: "📒" }, { name: "Ticking Scarab", icon: "🪲" },
+    { name: "Polished Flywheel", icon: "🛞" }, { name: "Sentinel Winder", icon: "🔑" },
+    { name: "Glasswork Compass", icon: "🧭" }, { name: "Chronal Tuning Fork", icon: "🎼" },
+    { name: "Rotary Buckler", icon: "🛡️" }, { name: "Pressure Crown", icon: "👑" },
+  ],
+  epic: [
+    { name: "Ticking Soulcore", icon: "🫀" }, { name: "Paradox Caliper", icon: "📐" },
+    { name: "Automaton Choir", icon: "🎼" }, { name: "Brass Seraph Wing", icon: "🪽" },
+    { name: "Clockmaker's Halo", icon: "😇" }, { name: "Temporal Anchor", icon: "⚓" },
+    { name: "Entropy Governor", icon: "🎛️" }, { name: "Stasis Prism", icon: "💠" },
+    { name: "Pendulum Scythe", icon: "🪓" }, { name: "Chrono-Spindle", icon: "🧵" },
+    { name: "Warden's Gearheart", icon: "⚙️" }, { name: "Glass Hourblade", icon: "⌛" },
+    { name: "Resonant Flywheel", icon: "🛞" }, { name: "Momentcatcher Orb", icon: "🔮" },
+    { name: "Cogbound Grimoire", icon: "📖" }, { name: "Steam-Sigil Mantle", icon: "🧥" },
+    { name: "Gearstorm Gauntlet", icon: "🥊" }, { name: "The Ninth Bell", icon: "🔔" },
+    { name: "Rift Escapement", icon: "🌀" }, { name: "Silvered Sundial", icon: "☀️" },
+  ],
+  legendary: [
+    { name: "Chronos Engine", icon: "⚙️" }, { name: "Brass Seraph", icon: "🪽" },
+    { name: "Crown of Seconds", icon: "👑" }, { name: "Dominion Orrery", icon: "🪐" },
+    { name: "The Stillpoint Key", icon: "🗝️" }, { name: "Emperor's Pendulum", icon: "⏱️" },
+    { name: "Cathedra Mechanica", icon: "🏛️" }, { name: "Last Bell of Dawn", icon: "🔔" },
+  ],
+  mythic: [
+    { name: "The Hourless King", icon: "⏰" },
+    { name: "The Last Second", icon: "🕰️" },
+  ],
+};
+
+function tagItems(items, banner) {
+  Object.entries(items).forEach(([rarity, list]) => {
+    list.forEach(item => { item.rarity = rarity; item.banner = banner; });
+  });
+}
+
+tagItems(ITEMS, "aetheris");
+tagItems(SUNKEN_ITEMS, "sunken");
+tagItems(CLOCKWORK_ITEMS, "clockwork");
+
+const ITEM_SETS = { aetheris: ITEMS, sunken: SUNKEN_ITEMS, clockwork: CLOCKWORK_ITEMS };
+const TIERS = ["mythic", "legendary", "epic", "rare", "common"];
+const CATALOG_ITEMS = Object.entries(ITEM_SETS).flatMap(([banner, set]) =>
+  TIERS.flatMap(rarity => (set[rarity] || []).map(item => ({ ...item, rarity, banner })))
+);
 
 let pulls = 100;
 let pity = 0;
@@ -1251,6 +1376,7 @@ let singleFlipped = false;
 let pulling = false;
 let activeBanner = 0;
 let activeTab = "collection";
+let activeInvBannerFilter = "all";
 let lastResults = [];
 let pitySoundedAt = -1;
 let audioContext = null;
@@ -1260,6 +1386,33 @@ const rarityClass = r => `rarity-${r}`;
 const rarityLabel = r => r.charAt(0).toUpperCase() + r.slice(1);
 const glowClass = r => `glow-${r}`;
 const shimmerClass = r => r === "mythic" ? "mythic-shimmer" : r === "legendary" ? "legendary-shimmer" : r === "epic" ? "epic-shimmer" : "";
+
+function getActiveBanner() {
+  return BANNERS[activeBanner] || BANNERS[0];
+}
+
+function getBannerById(id) {
+  return BANNERS.find(banner => banner.id === id) || BANNERS[0];
+}
+
+function bannerLabel(id) {
+  return getBannerById(id).shortName;
+}
+
+function findItemMeta(name) {
+  return CATALOG_ITEMS.find(item => item.name === name) || null;
+}
+
+function getPoolForActiveBanner(rarity) {
+  const banner = getActiveBanner();
+  const bannerPool = ITEM_SETS[banner.id]?.[rarity] || [];
+  if (banner.pool === "basePlusBanner") return [...ITEMS[rarity], ...bannerPool];
+  return bannerPool.length ? bannerPool : ITEMS[rarity];
+}
+
+function setActiveBannerAccent() {
+  document.documentElement.style.setProperty("--active-banner", getActiveBanner().accent);
+}
 
 function audioCtx() {
   if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -1347,11 +1500,18 @@ const SFX = {
 };
 
 function selectBanner(index, playSound = true) {
-  activeBanner = index;
-  $("banner-track").style.transform = `translateX(-${index * 100}%)`;
-  document.querySelectorAll(".banner-card").forEach((el, i) => el.classList.toggle("active", i === index));
-  document.querySelectorAll(".banner-dot").forEach((el, i) => el.classList.toggle("active", i === index));
-  $("pity-bar").classList.toggle("sunken", BANNERS[index].id === "sunken");
+  const nextIndex = Math.max(0, Math.min(index, BANNERS.length - 1));
+  activeBanner = nextIndex;
+  const banner = getActiveBanner();
+  $("banner-track").style.transform = `translateX(-${nextIndex * 100}%)`;
+  document.querySelectorAll(".banner-card").forEach((el, i) => el.classList.toggle("active", i === nextIndex));
+  document.querySelectorAll(".banner-dot").forEach((el, i) => el.classList.toggle("active", i === nextIndex));
+  $("pity-bar").classList.toggle("sunken", banner.id === "sunken");
+  $("pity-bar").classList.toggle("clockwork", banner.id === "clockwork");
+  setActiveBannerAccent();
+  $("odds-legendary").textContent = banner.guaranteeTen === "legendary"
+    ? "2% · guaranteed in every 10-pull"
+    : "2% · guaranteed at 50";
   if (playSound) SFX.click();
   saveState();
 }
@@ -1362,6 +1522,7 @@ function saveState() {
       icon: el.dataset.icon || "",
       name: el.dataset.name || "",
       rarity: el.dataset.rarity || "common",
+      banner: el.dataset.banner || "aetheris",
       pull: el.querySelector(".history-pull")?.textContent.trim() || "",
     }));
     localStorage.setItem(SAVE_KEY, JSON.stringify({
@@ -1370,6 +1531,7 @@ function saveState() {
       totalPulls,
       totalCollected,
       activeBanner,
+      activeInvBannerFilter,
       collection,
       history: histData,
     }));
@@ -1386,10 +1548,19 @@ function loadState() {
     totalPulls = state.totalPulls ?? 0;
     totalCollected = state.totalCollected ?? 0;
     activeBanner = state.activeBanner ?? 0;
+    activeInvBannerFilter = state.activeInvBannerFilter ?? "all";
     Object.keys(collection).forEach(k => delete collection[k]);
     if (state.collection) Object.assign(collection, state.collection);
+    Object.entries(collection).forEach(([name, data]) => {
+      const meta = findItemMeta(name);
+      if (!data.banner) data.banner = meta?.banner || "aetheris";
+    });
     $("history").innerHTML = "";
-    (state.history || []).forEach(h => $("history").appendChild(historyNode(h.rarity, { icon: h.icon, name: h.name }, h.pull)));
+    (state.history || []).forEach(h => {
+      const meta = findItemMeta(h.name);
+      $("history").appendChild(historyNode(h.rarity, { icon: h.icon, name: h.name, banner: h.banner || meta?.banner || "aetheris" }, h.pull));
+    });
+    updateFilterButtons();
     selectBanner(Math.min(activeBanner, BANNERS.length - 1), false);
   } catch (e) {}
 }
@@ -1398,8 +1569,13 @@ const collection = {};
 
 function collectItem(rarity, item) {
   const key = item.name;
-  if (collection[key]) collection[key].count++;
-  else collection[key] = { icon: item.icon, rarity, count: 1 };
+  const banner = item.banner || findItemMeta(item.name)?.banner || getActiveBanner().id;
+  if (collection[key]) {
+    collection[key].count++;
+    if (!collection[key].banner) collection[key].banner = banner;
+  } else {
+    collection[key] = { icon: item.icon, rarity, banner, count: 1 };
+  }
   totalCollected++;
   updateInvBadge();
 }
@@ -1412,11 +1588,38 @@ function clearInventoryBody() {
   $("inv-body").querySelectorAll(".inv-tier, .cdx-progress").forEach(el => el.remove());
 }
 
+
+function updateFilterButtons() {
+  document.querySelectorAll(".inv-filter").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.bannerFilter === activeInvBannerFilter);
+  });
+}
+
+function switchBannerFilter(filter) {
+  activeInvBannerFilter = filter;
+  updateFilterButtons();
+  if (activeTab === "collection") renderInv();
+  else renderCodex();
+  saveState();
+}
+
+function collectionEntriesForFilter() {
+  return Object.entries(collection).filter(([name, data]) => {
+    const banner = data.banner || findItemMeta(name)?.banner || "aetheris";
+    return activeInvBannerFilter === "all" || banner === activeInvBannerFilter;
+  });
+}
+
+function catalogItemsForFilter() {
+  return CATALOG_ITEMS.filter(item => activeInvBannerFilter === "all" || item.banner === activeInvBannerFilter);
+}
+
 function openInv() {
   SFX.click();
   activeTab = "collection";
   $("tab-collection").classList.add("active");
   $("tab-codex").classList.remove("active");
+  updateFilterButtons();
   renderInv();
   $("inv-overlay").classList.add("open");
   $("inv-panel").classList.add("open");
@@ -1438,14 +1641,19 @@ function switchTab(tab) {
 
 function renderInv() {
   clearInventoryBody();
-  const unique = Object.keys(collection).length;
-  $("inv-stats").textContent = `${unique} unique · ${totalCollected} total`;
+  const entries = collectionEntriesForFilter();
+  const unique = entries.length;
+  const filteredTotal = entries.reduce((sum, [, data]) => sum + data.count, 0);
+  const label = activeInvBannerFilter === "all" ? "all banners" : bannerLabel(activeInvBannerFilter);
+  $("inv-stats").textContent = `${unique} unique · ${filteredTotal} total · ${label}`;
+  $("inv-empty").textContent = activeInvBannerFilter === "all"
+    ? "No items yet. Begin summoning…"
+    : `No ${bannerLabel(activeInvBannerFilter)} items yet.`;
   $("inv-empty").style.display = unique === 0 ? "block" : "none";
   if (unique === 0) return;
 
-  const tiers = ["mythic", "legendary", "epic", "rare", "common"];
-  tiers.forEach(tier => {
-    const items = Object.entries(collection)
+  TIERS.forEach(tier => {
+    const items = entries
       .filter(([, value]) => value.rarity === tier)
       .sort((a, b) => a[0].localeCompare(b[0]));
     if (!items.length) return;
@@ -1459,12 +1667,14 @@ function renderInv() {
       <div class="inv-grid"></div>`;
     const grid = tierEl.querySelector(".inv-grid");
     items.forEach(([name, data]) => {
+      const banner = data.banner || findItemMeta(name)?.banner || "aetheris";
       const div = document.createElement("div");
       div.className = "inv-item";
       div.innerHTML = `
         <span class="inv-item-count${data.count > 1 ? " many" : ""}">×${data.count}</span>
         <span class="inv-item-icon">${data.icon}</span>
-        <span class="inv-item-name ${rarityClass(tier)}">${name}</span>`;
+        <span class="inv-item-name ${rarityClass(tier)}">${name}</span>
+        <span class="inv-item-source">${bannerLabel(banner)}</span>`;
       grid.appendChild(div);
     });
     $("inv-body").appendChild(tierEl);
@@ -1474,11 +1684,11 @@ function renderInv() {
 function renderCodex() {
   clearInventoryBody();
   $("inv-empty").style.display = "none";
-  const tiers = ["mythic", "legendary", "epic", "rare", "common"];
-  const allItems = tiers.flatMap(tier => ITEMS[tier].map(item => ({ ...item, rarity: tier })));
+  const allItems = catalogItemsForFilter();
   const unlockedCount = allItems.filter(item => collection[item.name]).length;
-  $("inv-stats").textContent = `${unlockedCount} / ${allItems.length} discovered`;
-  const pct = Math.round(unlockedCount / allItems.length * 100);
+  const label = activeInvBannerFilter === "all" ? "all banners" : bannerLabel(activeInvBannerFilter);
+  $("inv-stats").textContent = `${unlockedCount} / ${allItems.length} discovered · ${label}`;
+  const pct = allItems.length ? Math.round(unlockedCount / allItems.length * 100) : 0;
   const progressEl = document.createElement("div");
   progressEl.className = "cdx-progress";
   progressEl.innerHTML = `
@@ -1488,8 +1698,9 @@ function renderCodex() {
     ${pct}% discovered · ${unlockedCount} of ${allItems.length} items`;
   $("inv-body").insertBefore(progressEl, $("inv-empty"));
 
-  tiers.forEach(tier => {
-    const tierItems = ITEMS[tier];
+  TIERS.forEach(tier => {
+    const tierItems = allItems.filter(item => item.rarity === tier);
+    if (!tierItems.length) return;
     const unlockedInTier = tierItems.filter(item => collection[item.name]).length;
     const tierEl = document.createElement("div");
     tierEl.className = "inv-tier";
@@ -1508,6 +1719,7 @@ function renderCodex() {
         <span class="cdx-check">✦</span>
         <span class="cdx-item-icon">${item.icon}</span>
         <span class="cdx-item-name ${owned ? rarityClass(tier) : ""}">${owned ? item.name : "???"}</span>
+        <span class="inv-item-source">${bannerLabel(item.banner)}</span>
         ${owned && owned.count > 1 ? `<span style="position:absolute;top:5px;left:7px;font-size:.45rem;color:#666;font-family:'Cormorant Garamond',serif">×${owned.count}</span>` : ""}`;
       grid.appendChild(div);
     });
@@ -1625,13 +1837,24 @@ function roll() {
 }
 
 function pickItem(rarity) {
-  const pool = [...ITEMS[rarity]];
-  const rateUp = BANNERS[activeBanner].rateUp;
+  const pool = getPoolForActiveBanner(rarity);
+  const rateUp = getActiveBanner().rateUp;
   if (rateUp && rarity === "mythic") {
     const featured = pool.find(item => item.name === rateUp);
     if (featured && Math.random() < .5) return featured;
   }
   return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function rollTenPullResults() {
+  const results = [];
+  for (let i = 0; i < 10; i++) results.push({ rarity: roll(), item: null });
+  if (getActiveBanner().guaranteeTen === "legendary" && !results.some(result => RARITY_ORDER[result.rarity] >= RARITY_ORDER.legendary)) {
+    results[Math.floor(Math.random() * results.length)].rarity = "legendary";
+    pity = 0;
+  }
+  results.forEach(result => { result.item = pickItem(result.rarity); });
+  return results;
 }
 
 function buildMiniCard(id) {
@@ -1705,9 +1928,7 @@ function doSinglePullWith(rarity, item) {
 }
 
 function doTenPull() {
-  const results = [];
-  for (let i = 0; i < 10; i++) results.push({ rarity: roll(), item: null });
-  results.forEach(result => { result.item = pickItem(result.rarity); });
+  const results = rollTenPullResults();
   results.forEach(result => addHistory(result.rarity, result.item));
   lastResults = results;
   const grid = $("stage-multi");
@@ -1803,11 +2024,13 @@ function updatePity() {
 }
 
 function historyNode(rarity, item, pullLabel) {
+  const banner = item.banner || findItemMeta(item.name)?.banner || "aetheris";
   const div = document.createElement("div");
   div.className = "history-item";
   div.dataset.icon = item.icon;
   div.dataset.name = item.name;
   div.dataset.rarity = rarity;
+  div.dataset.banner = banner;
   div.innerHTML = `
     <span><span style="margin-right:9px">${item.icon}</span><span class="${rarityClass(rarity)}">${item.name}</span></span>
     <span class="history-pull">${pullLabel}</span>`;
@@ -1831,6 +2054,8 @@ function doReset() {
   pulling = false;
   singleFlipped = false;
   lastResults = [];
+  activeInvBannerFilter = "all";
+  updateFilterButtons();
   Object.keys(collection).forEach(k => delete collection[k]);
   $("btn-export").disabled = true;
   $("history").innerHTML = "";
@@ -2167,9 +2392,32 @@ function setNotice(msg) {
   $("exp-notice").textContent = msg;
 }
 
+function initBannerSwipe() {
+  const switcher = $("banner-switcher");
+  if (!switcher) return;
+  let startX = 0;
+  let startY = 0;
+  switcher.addEventListener("touchstart", event => {
+    const touch = event.touches[0];
+    startX = touch.clientX;
+    startY = touch.clientY;
+  }, { passive: true });
+  switcher.addEventListener("touchend", event => {
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - startX;
+    const dy = touch.clientY - startY;
+    if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy) * 1.3) return;
+    selectBanner(activeBanner + (dx < 0 ? 1 : -1));
+  }, { passive: true });
+}
+
+
 loadState();
+setActiveBannerAccent();
+updateFilterButtons();
 updateInvBadge();
 updateCurrency();
+initBannerSwipe();
 </script>
 </body>
 </html>
