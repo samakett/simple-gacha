@@ -642,7 +642,7 @@ h1 {
 .card-inner.flipped .card-new-badge.visible { opacity: 1; transform: none; }
 .stage-single .card-new-badge { top: 12px; left: 12px; font-size: .72rem; padding: 5px 11px; }
 
-.inv-overlay, .sum-overlay, .info-overlay, .detail-overlay, .forge-overlay, .exp-overlay {
+.inv-overlay, .sum-overlay, .info-overlay, .detail-overlay, .forge-overlay, .progress-overlay, .exp-overlay {
   position: fixed;
   inset: 0;
   z-index: 10;
@@ -656,9 +656,10 @@ h1 {
 .info-overlay { z-index: 14; }
 .detail-overlay { z-index: 22; }
 .forge-overlay { z-index: 24; }
+.progress-overlay { z-index: 26; }
 .exp-overlay { z-index: 20; background: rgba(0,0,0,.8); backdrop-filter: blur(6px); }
-.inv-overlay.open, .sum-overlay.open, .info-overlay.open, .detail-overlay.open, .forge-overlay.open, .exp-overlay.open { opacity: 1; pointer-events: all; }
-.inv-panel, .sum-panel, .info-panel, .detail-panel, .forge-panel, .exp-panel {
+.inv-overlay.open, .sum-overlay.open, .info-overlay.open, .detail-overlay.open, .forge-overlay.open, .progress-overlay.open, .exp-overlay.open { opacity: 1; pointer-events: all; }
+.inv-panel, .sum-panel, .info-panel, .detail-panel, .forge-panel, .progress-panel, .exp-panel {
   position: fixed;
   left: 0;
   right: 0;
@@ -679,8 +680,9 @@ h1 {
 .info-panel { z-index: 15; max-height: 90vh; background: #09090f; }
 .detail-panel { z-index: 23; max-height: 84vh; background: #09090f; }
 .forge-panel { z-index: 25; max-height: 86vh; background: #09090f; }
+.progress-panel { z-index: 27; max-height: 90vh; background: #09090f; }
 .exp-panel { z-index: 21; max-height: 92vh; background: #09090f; }
-.inv-panel.open, .sum-panel.open, .info-panel.open, .detail-panel.open, .forge-panel.open, .exp-panel.open { transform: translateY(0); }
+.inv-panel.open, .sum-panel.open, .info-panel.open, .detail-panel.open, .forge-panel.open, .progress-panel.open, .exp-panel.open { transform: translateY(0); }
 .inv-handle {
   flex-shrink: 0;
   width: 32px;
@@ -689,7 +691,7 @@ h1 {
   border-radius: 2px;
   background: var(--border2);
 }
-.inv-header, .sum-header, .info-header, .detail-header, .forge-header, .exp-header {
+.inv-header, .sum-header, .info-header, .detail-header, .forge-header, .progress-header, .exp-header {
   display: flex;
   flex-shrink: 0;
   align-items: center;
@@ -848,7 +850,7 @@ h1 {
   text-align: center;
 }
 
-.sum-body, .info-body, .detail-body, .forge-body {
+.sum-body, .info-body, .detail-body, .forge-body, .progress-body {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -915,6 +917,14 @@ h1 {
 .forge-recipe { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel); }
 .forge-recipe-title { font-size: .82rem; letter-spacing: .08em; }
 .forge-recipe-sub { margin-top: 4px; color: #666; font: italic .82rem "Cormorant Garamond", serif; }
+.progress-card { padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel); }
+.progress-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+.progress-title { color: var(--text-hi); font-size: .88rem; letter-spacing: .08em; }
+.progress-sub { margin-top: 4px; color: #777; font: italic .84rem "Cormorant Garamond", serif; }
+.progress-bar { height: 5px; margin-top: 9px; border-radius: 999px; background: #171724; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 999px; background: var(--active-banner); transition: width .4s ease; }
+.progress-list { display: flex; flex-direction: column; gap: 10px; }
+.bonus-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
 .sum-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .sum-stat {
   display: flex;
@@ -1153,7 +1163,7 @@ h1 {
 .inv-item-count { font-size: .9rem; }
 .cdx-check { font-size: .86rem; }
 .cdx-item.locked .cdx-item-icon { filter: blur(3px) grayscale(.8); }
-.sum-body, .info-body, .detail-body, .forge-body { font-size: 1rem; }
+.sum-body, .info-body, .detail-body, .forge-body, .progress-body { font-size: 1rem; }
 .sum-section-title { font-size: .76rem; }
 .sum-stat-label { font-size: .62rem; }
 .sum-best-rarity, .sum-best-pull { font-size: .76rem; }
@@ -1296,6 +1306,7 @@ h1 {
       <button class="btn btn-inv" onclick="openInv()">⬡ Collection <span class="inv-badge" id="inv-badge">0</span></button>
       <button class="btn btn-forge" onclick="openShardForge()">⬡ Shard Forge</button>
       <button class="btn btn-info" onclick="openBannerInfo()">ⓘ Banner Details</button>
+      <button class="btn btn-summary" onclick="openProgress()">◎ Progress</button>
       <div class="btn-row">
         <button class="btn btn-summary" onclick="openSummary()">◈ Summary</button>
         <button class="btn btn-export" id="btn-export" onclick="openExport()" disabled>↗ Share Pull</button>
@@ -1389,6 +1400,16 @@ h1 {
   <div class="forge-body" id="forge-body"></div>
 </div>
 
+<div class="progress-overlay" id="progress-overlay" onclick="closeProgress()"></div>
+<div class="progress-panel" id="progress-panel">
+  <div class="inv-handle"></div>
+  <div class="progress-header">
+    <span class="inv-title">Missions & Mastery</span>
+    <button class="inv-close" onclick="closeProgress()">✕</button>
+  </div>
+  <div class="progress-body" id="progress-body"></div>
+</div>
+
 <div class="exp-overlay" id="exp-overlay" onclick="closeExport()"></div>
 <div class="exp-panel" id="exp-panel">
   <div class="inv-handle"></div>
@@ -1422,6 +1443,15 @@ const SHARD_RECIPES = [
   { rarity: "legendary", cost: 4, pulls: 15 },
   { rarity: "mythic", cost: 1, pulls: 25 },
 ];
+const MISSIONS = [
+  { id: "first-summon", title: "Open the Gate", description: "Perform your first summon.", target: 1, metric: () => totalPulls, reward: { pulls: 3 } },
+  { id: "ten-summons", title: "Tenfold Ritual", description: "Perform 10 total summons.", target: 10, metric: () => totalPulls, reward: { pulls: 5 } },
+  { id: "first-duplicate", title: "Echo in the Vault", description: "Pull your first duplicate item.", target: 1, metric: () => duplicateCount(), reward: { shards: { rare: 5 } } },
+  { id: "collector-10", title: "First Shelf Filled", description: "Discover 10 unique items.", target: 10, metric: () => Object.keys(collection).length, reward: { pulls: 5 } },
+  { id: "epic-trace", title: "Epic Trace", description: "Own 3 Epic-or-better items.", target: 3, metric: () => ownedAtLeast("epic"), reward: { shards: { epic: 2 } } },
+  { id: "banner-tour", title: "Three Doors Open", description: "Discover at least one item from every banner.", target: 3, metric: () => bannersTouched(), reward: { pulls: 10 } },
+];
+const ACHIEVEMENT_THRESHOLDS = [25, 50, 75, 100];
 
 const BANNERS = [
   { id: "aetheris", name: "Aetheris", shortName: "Aetheris", accent: "#c9a84c", pool: "exclusive", rateUp: null, guaranteeTen: null, rule: "Standard summoning pool with its own 50-pull Legendary pity." },
@@ -1592,6 +1622,8 @@ const CATALOG_ITEMS = Object.entries(ITEM_SETS).flatMap(([banner, set]) =>
 let pulls = 100;
 let pityByBanner = makeBannerState(0);
 let shardBalances = makeShardState(0);
+let claimedMissions = {};
+let claimedAchievements = {};
 let totalPulls = 0;
 let totalCollected = 0;
 let singleFlipped = false;
@@ -1778,6 +1810,8 @@ function saveState() {
       pity: getPity(),
       pityByBanner,
       shardBalances,
+      claimedMissions,
+      claimedAchievements,
       totalPulls,
       totalCollected,
       activeBanner,
@@ -1801,6 +1835,8 @@ function loadState() {
     resetPityState();
     shardBalances = makeShardState(0);
     if (state.shardBalances) Object.assign(shardBalances, state.shardBalances);
+    claimedMissions = state.claimedMissions || {};
+    claimedAchievements = state.claimedAchievements || {};
     if (state.pityByBanner) {
       Object.assign(pityByBanner, state.pityByBanner);
     } else {
@@ -1848,21 +1884,59 @@ function updateInvBadge() {
   $("inv-badge").textContent = Object.keys(collection).length;
 }
 
+function flavorHash(value) {
+  return [...value].reduce((hash, ch) => ((hash << 5) - hash + ch.charCodeAt(0)) | 0, 0) >>> 0;
+}
+
+function flavorPick(item, list, offset = 0) {
+  return list[(flavorHash(`${item.banner}:${item.rarity}:${item.name}`) + offset) % list.length];
+}
+
 function itemFlavor(item, owned) {
-  const rarityTone = {
-    common: "a humble relic whose small rituals still remember older hands",
-    rare: "a practiced instrument with a willful glimmer beneath its surface",
-    epic: "a dangerous treasure, dense with half-woken power",
-    legendary: "a named artifact that bends stories around whoever carries it",
-    mythic: "a forbidden inheritance, closer to a living omen than an object",
+  const status = {
+    common: "a minor working, traded between hands but never entirely ordinary",
+    rare: "a respected relic, recognized by collectors who know what to listen for",
+    epic: "a volatile treasure, powerful enough to change the shape of a journey",
+    legendary: "a sovereign artifact, named in songs, warnings, and disputed histories",
+    mythic: "a near-divine remnant, less an item than a surviving law of the world",
   }[item.rarity];
-  const bannerTone = {
-    aetheris: "Aetheris marks it with starfire, courtly ruin, and the quiet pressure of ancient vows",
-    sunken: "The Sunken Archive leaves brine in its seams, as if the deep is still reading through it",
-    clockwork: "The Clockwork Dominion winds it with brass logic, measured seconds, and patient inevitability",
+  const bannerLore = {
+    aetheris: [
+      "It remembers oath-lit halls and constellations seen through broken glass",
+      "Its magic rises like gold dust from a court that vanished before dawn",
+      "Old Aetheris hid a vow inside it, and the vow still answers to touch",
+      "It carries the etiquette of ruined kings and the threat of starfire",
+    ],
+    sunken: [
+      "The archive below pressed a secret into it and sealed the seam with brine",
+      "It smells faintly of cold stone, drowned bells, and pages that never dried",
+      "Something in the trench recognized it and let it return to the surface",
+      "Its surface sweats salt whenever a forgotten name is spoken nearby",
+    ],
+    clockwork: [
+      "Its inner rhythm measures promises in teeth, springs, and exacting seconds",
+      "The Dominion wound it for a purpose that has not yet arrived",
+      "Every click inside it sounds like a verdict being carefully postponed",
+      "It keeps time with a machine-city that refuses to admit it is dead",
+    ],
   }[item.banner];
-  if (!owned) return `An undiscovered ${rarityLabel(item.rarity)} from ${bannerLabel(item.banner)}. Its outline suggests ${rarityTone}.`;
-  return `${item.name} is ${rarityTone}. ${bannerTone}; duplicate copies are rendered into ${rarityLabel(item.rarity)} shards by the forge.`;
+  const motifs = [
+    `The ${item.icon} sigil marks it as ${status}`,
+    `Scholars classify ${item.name} as ${status}`,
+    `To hold ${item.name} is to carry ${status}`,
+    `In the codex margin, ${item.name} is described as ${status}`,
+  ];
+  const quirks = [
+    "It grows warm near unfinished business",
+    "Its shadow points toward the last person who needed it",
+    "It hums when brought near another relic of its banner",
+    "It refuses to stay clean, as if history keeps settling on it",
+    "It feels heavier when someone lies about why they want it",
+    "It leaves a brief afterimage in the color of its rarity",
+  ];
+  const base = `${item.name}: ${flavorPick(item, motifs)}. ${flavorPick(item, bannerLore, 3)}. ${flavorPick(item, quirks, 7)}.`;
+  if (!owned) return `${base} Its true name remains veiled until discovered.`;
+  return `${base} Duplicate copies are rendered into ${rarityLabel(item.rarity)} shards, preserving the echo while freeing the power.`;
 }
 
 function openItemDetail(name) {
@@ -2131,6 +2205,173 @@ function closeSummary() {
   $("sum-panel").classList.remove("open");
 }
 
+function bannerCatalogCount(bannerId) {
+  return CATALOG_ITEMS.filter(item => item.banner === bannerId).length;
+}
+
+function bannerDiscoveredCount(bannerId) {
+  return CATALOG_ITEMS.filter(item => item.banner === bannerId && collection[item.name]).length;
+}
+
+function bannerCompletionPct(bannerId) {
+  const total = bannerCatalogCount(bannerId);
+  return total ? Math.floor(bannerDiscoveredCount(bannerId) / total * 100) : 0;
+}
+
+function duplicateCount() {
+  return Object.values(collection).reduce((sum, item) => sum + Math.max(0, item.count - 1), 0);
+}
+
+function ownedAtLeast(rarity) {
+  return Object.values(collection).reduce((sum, item) => sum + (RARITY_ORDER[item.rarity] >= RARITY_ORDER[rarity] ? item.count : 0), 0);
+}
+
+function bannersTouched() {
+  return BANNERS.filter(banner => bannerDiscoveredCount(banner.id) > 0).length;
+}
+
+function collectionBonusForBanner(bannerId) {
+  const pct = bannerCompletionPct(bannerId);
+  return {
+    rare: pct >= 25 ? .02 : 0,
+    epic: pct >= 50 ? .01 : 0,
+    legendary: pct >= 75 ? .005 : 0,
+  };
+}
+
+function effectiveRatesForActiveBanner() {
+  const bonus = collectionBonusForBanner(getActiveBannerId());
+  const rates = { ...RATES };
+  rates.rare += bonus.rare;
+  rates.epic += bonus.epic;
+  rates.legendary += bonus.legendary;
+  rates.common = Math.max(0, 1 - rates.mythic - rates.legendary - rates.epic - rates.rare);
+  return rates;
+}
+
+function rewardText(reward) {
+  const parts = [];
+  if (reward.pulls) parts.push(`${reward.pulls} pull${reward.pulls !== 1 ? "s" : ""}`);
+  if (reward.shards) Object.entries(reward.shards).forEach(([rarity, count]) => parts.push(`${count} ${rarityLabel(rarity)} shard${count !== 1 ? "s" : ""}`));
+  return parts.join(" + ");
+}
+
+function applyReward(reward) {
+  if (reward.pulls) pulls += reward.pulls;
+  if (reward.shards) Object.entries(reward.shards).forEach(([rarity, count]) => { shardBalances[rarity] += count; });
+  SFX.addPulls();
+  updateCurrency();
+}
+
+function missionProgress(mission) {
+  return Math.min(mission.metric(), mission.target);
+}
+
+function missionComplete(mission) {
+  return mission.metric() >= mission.target;
+}
+
+function claimMission(id) {
+  const mission = MISSIONS.find(m => m.id === id);
+  if (!mission || claimedMissions[id] || !missionComplete(mission)) return;
+  claimedMissions[id] = true;
+  applyReward(mission.reward);
+  renderProgress();
+  saveState();
+}
+
+function achievementKey(bannerId, threshold) {
+  return `${bannerId}:${threshold}`;
+}
+
+function achievementReward(threshold) {
+  if (threshold === 25) return { pulls: 3 };
+  if (threshold === 50) return { pulls: 5, shards: { epic: 1 } };
+  if (threshold === 75) return { pulls: 8, shards: { legendary: 1 } };
+  return { pulls: 15, shards: { mythic: 1 } };
+}
+
+function claimAchievement(bannerId, threshold) {
+  const key = achievementKey(bannerId, threshold);
+  if (claimedAchievements[key] || bannerCompletionPct(bannerId) < threshold) return;
+  claimedAchievements[key] = true;
+  applyReward(achievementReward(threshold));
+  renderProgress();
+  saveState();
+}
+
+function openProgress() {
+  SFX.click();
+  renderProgress();
+  $("progress-overlay").classList.add("open");
+  $("progress-panel").classList.add("open");
+}
+
+function closeProgress() {
+  SFX.click();
+  $("progress-overlay").classList.remove("open");
+  $("progress-panel").classList.remove("open");
+}
+
+function renderProgress() {
+  const activeBonus = collectionBonusForBanner(getActiveBannerId());
+  $("progress-body").innerHTML = `
+    <div>
+      <div class="sum-section-title">Collection Bonuses</div>
+      <div class="bonus-grid">
+        <div class="info-stat"><div class="info-stat-label">Rare Bonus</div><div class="info-stat-value">+${Math.round(activeBonus.rare * 100)}%</div></div>
+        <div class="info-stat"><div class="info-stat-label">Epic Bonus</div><div class="info-stat-value">+${Math.round(activeBonus.epic * 100)}%</div></div>
+        <div class="info-stat"><div class="info-stat-label">Legendary Bonus</div><div class="info-stat-value">+${(activeBonus.legendary * 100).toFixed(1)}%</div></div>
+        <div class="info-stat"><div class="info-stat-label">Active Banner</div><div class="info-stat-value">${bannerCompletionPct(getActiveBannerId())}%</div></div>
+      </div>
+      <div class="progress-sub" style="margin-top:10px">Bonuses unlock at 25%, 50%, and 75% completion for the active banner and reduce Common odds.</div>
+    </div>
+    <div>
+      <div class="sum-section-title">Missions</div>
+      <div class="progress-list">
+        ${MISSIONS.map(mission => {
+          const progress = missionProgress(mission);
+          const complete = missionComplete(mission);
+          const claimed = claimedMissions[mission.id];
+          return `
+            <div class="progress-card">
+              <div class="progress-row">
+                <div><div class="progress-title">${mission.title}</div><div class="progress-sub">${mission.description} · Reward: ${rewardText(mission.reward)}</div></div>
+                <button class="btn btn-add" onclick="claimMission('${mission.id}')" ${complete && !claimed ? "" : "disabled"}>${claimed ? "Claimed" : "Claim"}</button>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100, progress / mission.target * 100)}%"></div></div>
+              <div class="progress-sub">${progress} / ${mission.target}</div>
+            </div>`;
+        }).join("")}
+      </div>
+    </div>
+    <div>
+      <div class="sum-section-title">Banner Achievements</div>
+      <div class="progress-list">
+        ${BANNERS.map(banner => {
+          const pct = bannerCompletionPct(banner.id);
+          return `
+            <div class="progress-card">
+              <div class="progress-title">${banner.name}</div>
+              <div class="progress-sub">${bannerDiscoveredCount(banner.id)} / ${bannerCatalogCount(banner.id)} discovered · ${pct}% complete</div>
+              <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+              <div class="forge-recipes" style="margin-top:10px">
+                ${ACHIEVEMENT_THRESHOLDS.map(threshold => {
+                  const key = achievementKey(banner.id, threshold);
+                  const canClaim = pct >= threshold && !claimedAchievements[key];
+                  return `
+                    <div class="forge-recipe">
+                      <div><div class="forge-recipe-title">${threshold}% Mastery</div><div class="forge-recipe-sub">Reward: ${rewardText(achievementReward(threshold))}</div></div>
+                      <button class="btn btn-add" onclick="claimAchievement('${banner.id}', ${threshold})" ${canClaim ? "" : "disabled"}>${claimedAchievements[key] ? "Claimed" : "Claim"}</button>
+                    </div>`;
+                }).join("")}
+              </div>
+            </div>`;
+        }).join("")}
+      </div>
+    </div>`;
+}
+
 function renderSummary() {
   const body = $("sum-body");
   const counts = { common: 0, rare: 0, epic: 0, legendary: 0, mythic: 0 };
@@ -2221,11 +2462,12 @@ function roll() {
     tone(440, "sine", .06, 0, .12);
     tone(554, "sine", .05, .1, .12);
   }
+  const rates = effectiveRatesForActiveBanner();
   const r = Math.random();
-  if (r < RATES.mythic) { setPity(0, bannerId); return "mythic"; }
-  if (r < RATES.mythic + RATES.legendary) { setPity(0, bannerId); return "legendary"; }
-  if (r < RATES.mythic + RATES.legendary + RATES.epic) return "epic";
-  if (r < RATES.mythic + RATES.legendary + RATES.epic + RATES.rare) return "rare";
+  if (r < rates.mythic) { setPity(0, bannerId); return "mythic"; }
+  if (r < rates.mythic + rates.legendary) { setPity(0, bannerId); return "legendary"; }
+  if (r < rates.mythic + rates.legendary + rates.epic) return "epic";
+  if (r < rates.mythic + rates.legendary + rates.epic + rates.rare) return "rare";
   return "common";
 }
 
@@ -2518,6 +2760,8 @@ function doReset() {
   singleFlipped = false;
   lastResults = [];
   activeInvBannerFilter = "all";
+  claimedMissions = {};
+  claimedAchievements = {};
   updateFilterButtons();
   Object.keys(collection).forEach(k => delete collection[k]);
   $("btn-export").disabled = true;
