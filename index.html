@@ -1267,6 +1267,44 @@ body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%
   .nav-btn { width: 44px; height: 44px; font-size: .44rem; }
 }
 
+
+@keyframes driftField { from { transform: translate3d(0,0,0); } to { transform: translate3d(-18px, 12px, 0); } }
+@keyframes mythicBreath { 0%,100% { box-shadow: 0 0 20px rgba(239,68,68,.35), inset 0 0 24px rgba(239,68,68,.08); } 50% { box-shadow: 0 0 42px rgba(239,68,68,.75), inset 0 0 34px rgba(239,68,68,.18); } }
+body::after {
+  content: "";
+  position: fixed;
+  inset: -30px;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .22;
+  background-image: radial-gradient(1px 1px at 15% 20%, rgba(255,255,255,.45), transparent), radial-gradient(1px 1px at 65% 75%, rgba(255,255,255,.28), transparent), radial-gradient(1px 1px at 80% 30%, rgba(255,255,255,.25), transparent);
+  animation: driftField 18s linear infinite alternate;
+}
+body.theme-sunken::after { opacity:.18; background-image: radial-gradient(5px 5px at 20% 80%, rgba(45,212,191,.25), transparent), radial-gradient(3px 3px at 75% 65%, rgba(167,243,208,.22), transparent), radial-gradient(2px 2px at 50% 30%, rgba(14,165,233,.18), transparent); }
+body.theme-clockwork::after { opacity:.16; background-image: repeating-radial-gradient(circle at 70% 35%, rgba(214,163,91,.08) 0 2px, transparent 3px 18px); animation-duration: 28s; }
+body.theme-verdant::after { opacity:.2; background-image: radial-gradient(3px 3px at 15% 70%, rgba(187,247,208,.22), transparent), radial-gradient(2px 2px at 80% 25%, rgba(74,222,128,.2), transparent); }
+.card-front.anticipating { animation: anticipationPulse .55s ease 1; }
+@keyframes anticipationPulse { 0% { filter: brightness(1); } 45% { filter: brightness(1.8); } 100% { filter: brightness(1); } }
+.card-front.rarity-mythic { animation: mythicBreath 1.8s ease-in-out infinite; }
+.banner-pull-flash {
+  position: fixed; inset: 0; z-index: 25; pointer-events: none; opacity: 0; transition: opacity .22s ease;
+}
+.banner-pull-flash.on { opacity: 1; }
+.banner-pull-flash.aetheris { background: radial-gradient(ellipse at center, rgba(201,168,76,.22), transparent 65%); }
+.banner-pull-flash.sunken { background: radial-gradient(ellipse at center, rgba(45,212,191,.2), transparent 65%); }
+.banner-pull-flash.clockwork { background: radial-gradient(ellipse at center, rgba(214,163,91,.22), transparent 65%); }
+.inv-grid.mode-list, .inv-grid.mode-shelf { grid-template-columns: 1fr; }
+.inv-grid.mode-list .inv-item, .inv-grid.mode-list .cdx-item { min-height: auto; flex-direction: row; justify-content: flex-start; text-align: left; padding: 14px; }
+.inv-grid.mode-list .inv-item-icon, .inv-grid.mode-list .cdx-item-icon { font-size: 2rem; }
+.inv-grid.mode-shelf .inv-item, .inv-grid.mode-shelf .cdx-item { min-height: 92px; border-left: 4px solid currentColor; }
+.favorite-showcase { display:flex; gap:12px; align-items:center; padding:14px; border:1px solid var(--border2); border-radius:14px; background:var(--panel); margin-bottom:14px; }
+.favorite-showcase-icon { font-size:2.4rem; filter:drop-shadow(0 0 10px currentColor); }
+.celebration-overlay { position:fixed; inset:0; z-index:70; display:flex; align-items:center; justify-content:center; pointer-events:none; opacity:0; transition:opacity .25s ease; background:radial-gradient(ellipse at center, rgba(201,168,76,.24), transparent 65%); }
+.celebration-overlay.on { opacity:1; }
+.celebration-card { padding:22px 26px; border:1px solid var(--gold); border-radius:18px; background:rgba(7,7,15,.86); color:var(--text-hi); text-align:center; box-shadow:0 0 40px rgba(201,168,76,.25); }
+.celebration-title { font-family:"Cinzel Decorative",cursive; font-size:1.25rem; letter-spacing:.08em; color:var(--gold); }
+.celebration-sub { margin-top:8px; font:italic 1rem "Cormorant Garamond",serif; color:#b8b4a8; }
+
 /* Readability pass: favor legibility over density on mobile. */
 .banner-name { font-size: .95rem; }
 .banner-sub { font-size: .86rem; }
@@ -1528,6 +1566,8 @@ body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%
 <canvas id="leg-canvas"></canvas>
 <div class="leg-tap-prompt" id="leg-tap-prompt">tap to continue</div>
 <div class="pull-view-overlay" id="pull-view-overlay" onclick="closePullViewer()"></div>
+<div class="banner-pull-flash" id="banner-pull-flash"></div>
+<div class="celebration-overlay" id="celebration-overlay"></div>
 <div class="recap-overlay" id="recap-overlay" onclick="closePullRecap()"></div>
 
 <div class="inv-overlay" id="inv-overlay" onclick="closeInv()"></div>
@@ -1918,6 +1958,8 @@ let unlockedBackgrounds = { aetheris: true };
 let activeBackground = "aetheris";
 let periodStats = { dailyKey: "", weeklyKey: "", dailyPulls: 0, dailyRarePlus: 0, weeklyPulls: 0, weeklyNewItems: 0, weeklyLegendaryPlus: 0 };
 let collectionSearch = "";
+let collectionDisplayMode = "grid";
+let favoriteItemName = "";
 let playerProfile = { name: "Wandering Summoner", title: "Gate-Touched" };
 let friendCodes = [];
 let tradeOffers = [];
@@ -2152,6 +2194,8 @@ function saveState() {
       unlockedBackgrounds,
       activeBackground,
       periodStats,
+      collectionDisplayMode,
+      favoriteItemName,
       playerProfile,
       friendCodes,
       tradeOffers,
@@ -2197,6 +2241,8 @@ function loadState() {
     unlockedBackgrounds = state.unlockedBackgrounds || { aetheris: true };
     activeBackground = state.activeBackground || "aetheris";
     periodStats = state.periodStats || periodStats;
+    collectionDisplayMode = state.collectionDisplayMode || "grid";
+    favoriteItemName = state.favoriteItemName || "";
     playerProfile = state.playerProfile || playerProfile;
     friendCodes = state.friendCodes || [];
     tradeOffers = state.tradeOffers || [];
@@ -2247,6 +2293,7 @@ function collectItem(rarity, item) {
   totalCollected++;
   updateInvBadge();
   updateShardWallet();
+  if (isNew && rarity === "mythic") showCelebration("Mythic Discovered", item.name);
   return { isNew, shardsAwarded };
 }
 
@@ -2333,7 +2380,7 @@ function openItemDetail(name) {
         <span class="detail-chip">${discovered ? `Owned ×${owned.count}` : "Locked"}</span>
         ${discovered ? `<span class="detail-chip">Found #${owned.discoveredAt}</span><span class="detail-chip">Dupe +${SHARD_VALUES[item.rarity]} shards</span>` : ""}
       </div>
-      ${discovered ? `<div class="detail-flavor">${itemFlavor(item, discovered)}</div>` : ""}
+      ${discovered ? `<div class="detail-flavor">${itemFlavor(item, discovered)}</div><button class="btn btn-primary" onclick="setFavoriteItem('${item.name.replace(/'/g, "\'")}')">☆ Set Favorite</button>` : ""}
     </div>`;
   $("detail-overlay").classList.add("open");
   $("detail-panel").classList.add("open");
@@ -2505,10 +2552,52 @@ function switchTab(tab) {
   renderCollectionPage();
 }
 
+function flashBannerPullEffect(bannerId = getActiveBannerId()) {
+  const flash = $("banner-pull-flash");
+  if (!flash) return;
+  flash.className = `banner-pull-flash ${bannerId} on`;
+  setTimeout(() => flash.classList.remove("on"), 360);
+}
+
+function showCelebration(title, subtitle = "") {
+  const overlay = $("celebration-overlay");
+  if (!overlay) return;
+  overlay.innerHTML = `<div class="celebration-card"><div class="celebration-title">${title}</div><div class="celebration-sub">${subtitle}</div></div>`;
+  overlay.classList.add("on");
+  setTimeout(() => overlay.classList.remove("on"), 1800);
+}
+
+function anticipateCard(front, rarity) {
+  if (!front) return;
+  front.classList.add("anticipating", rarityClass(rarity));
+  setTimeout(() => front.classList.remove("anticipating"), 620);
+}
+
+function setCollectionDisplayMode(mode) {
+  collectionDisplayMode = mode;
+  renderCollectionPage();
+  saveState();
+}
+
+function setFavoriteItem(name) {
+  if (!collection[name]) return;
+  favoriteItemName = name;
+  showCelebration("Favorite Set", name);
+  renderCollectionPage();
+  saveState();
+}
+
+function favoriteShowcaseHtml() {
+  const fav = favoriteItemName && collection[favoriteItemName] ? { name: favoriteItemName, ...collection[favoriteItemName] } : null;
+  if (!fav) return `<div class="favorite-showcase"><div class="favorite-showcase-icon">☆</div><div><div class="progress-title">No favorite selected</div><div class="progress-sub">Tap a discovered item detail and mark it as favorite.</div></div></div>`;
+  return `<div class="favorite-showcase"><div class="favorite-showcase-icon ${rarityClass(fav.rarity)}">${fav.icon}</div><div><div class="progress-title">${fav.name}</div><div class="progress-sub">Favorite showcase · ${rarityLabel(fav.rarity)} · Owned ×${fav.count}</div></div></div>`;
+}
+
 function renderCollectionPage() {
   const body = $("page-inv-body");
   if (!body) return;
   updateFilterButtons();
+  const modeControls = `<div class="mission-subnav" style="margin:10px 0"><button class="btn ${collectionDisplayMode === "grid" ? "btn-primary" : ""}" onclick="setCollectionDisplayMode('grid')">Grid</button><button class="btn ${collectionDisplayMode === "list" ? "btn-primary" : ""}" onclick="setCollectionDisplayMode('list')">List</button><button class="btn ${collectionDisplayMode === "shelf" ? "btn-primary" : ""}" onclick="setCollectionDisplayMode('shelf')">Shelf</button></div>`;
   const stats = $("page-inv-stats");
   const emptyText = activeInvBannerFilter === "all" ? "No items yet. Begin summoning…" : `No ${bannerLabel(activeInvBannerFilter)} items yet.`;
   if (activeTab === "collection") {
@@ -2518,16 +2607,16 @@ function renderCollectionPage() {
     const label = activeInvBannerFilter === "all" ? "all banners" : bannerLabel(activeInvBannerFilter);
     stats.textContent = `${unique} unique · ${filteredTotal} total · ${label}`;
     if (!unique) {
-      body.innerHTML = `<div class="inv-empty">${emptyText}</div>`;
+      body.innerHTML = favoriteShowcaseHtml() + modeControls + `<div class="inv-empty">${emptyText}</div>`;
       return;
     }
-    body.innerHTML = TIERS.map(tier => {
+    body.innerHTML = favoriteShowcaseHtml() + modeControls + TIERS.map(tier => {
       const items = entries.filter(([, value]) => value.rarity === tier).sort((a, b) => a[0].localeCompare(b[0]));
       if (!items.length) return "";
       return `
         <div class="inv-tier">
           <div class="inv-tier-label ${rarityClass(tier)}">◆ ${rarityLabel(tier)}<span class="inv-tier-count">${items.length} item${items.length !== 1 ? "s" : ""}</span></div>
-          <div class="inv-grid">
+          <div class="inv-grid mode-${collectionDisplayMode}">
             ${items.map(([name, data]) => {
               const banner = data.banner || findItemMeta(name)?.banner || "aetheris";
               return `<div class="inv-item" onclick="openItemDetail('${name.replace(/'/g, "\'")}')"><span class="inv-item-count${data.count > 1 ? " many" : ""}">×${data.count}</span><span class="inv-item-icon">${data.icon}</span><span class="inv-item-name ${rarityClass(tier)}">${name}</span><span class="inv-item-source">${bannerLabel(banner)}</span></div>`;
@@ -2541,7 +2630,7 @@ function renderCollectionPage() {
     const label = activeInvBannerFilter === "all" ? "all banners" : bannerLabel(activeInvBannerFilter);
     stats.textContent = `${unlockedCount} / ${allItems.length} discovered · ${label}`;
     const pct = allItems.length ? Math.round(unlockedCount / allItems.length * 100) : 0;
-    body.innerHTML = `
+    body.innerHTML = favoriteShowcaseHtml() + modeControls + `
       <div class="cdx-progress"><div style="width:100%;height:3px;background:var(--panel);border-radius:2px;overflow:hidden;margin-bottom:8px"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#5eb4ff,#c084fc,#f97316);border-radius:2px"></div></div>${pct}% discovered · ${unlockedCount} of ${allItems.length} items</div>
       ${TIERS.map(tier => {
         const tierItems = allItems.filter(item => item.rarity === tier);
@@ -2550,7 +2639,7 @@ function renderCollectionPage() {
         return `
           <div class="inv-tier">
             <div class="inv-tier-label ${rarityClass(tier)}">◆ ${rarityLabel(tier)}<span class="inv-tier-count">${unlockedInTier} / ${tierItems.length}</span></div>
-            <div class="inv-grid">
+            <div class="inv-grid mode-${collectionDisplayMode}">
               ${tierItems.map(item => {
                 const owned = collection[item.name];
                 return `<div class="cdx-item ${owned ? "unlocked" : "locked"}" onclick="openItemDetail('${item.name.replace(/'/g, "\'")}')"><span class="cdx-check">✦</span><span class="cdx-item-icon">${item.icon}</span><span class="cdx-item-name ${owned ? rarityClass(tier) : ""}">${owned ? item.name : "???"}</span><span class="inv-item-source">${bannerLabel(item.banner)}</span>${owned && owned.count > 1 ? `<span style="position:absolute;top:5px;left:7px;font-size:.45rem;color:#666;font-family:'Cormorant Garamond',serif">×${owned.count}</span>` : ""}</div>`;
@@ -2903,6 +2992,7 @@ function claimCodexAward(id) {
   const award = CODEX_AWARDS.find(a => a.id === id);
   if (!award || claimedCodexAwards[id] || !codexAwardProgress(award.rarity).complete) return;
   claimedCodexAwards[id] = true;
+  showCelebration("Codex Award", award.title);
   applyReward(award.reward);
   renderMissionsPage();
   saveState();
@@ -2921,6 +3011,7 @@ function claimItemSet(id) {
   const set = COLLECTION_SETS.find(s => s.id === id);
   if (!set || claimedItemSets[id] || !itemSetProgress(set).complete) return;
   claimedItemSets[id] = true;
+  showCelebration("Set Complete", set.title);
   applyReward(set.reward);
   renderMissionsPage();
   saveState();
@@ -3409,6 +3500,8 @@ function revealSingle(card, front, rarity, item) {
   $("tag-single").className = `rarity-tag ${cls}`;
   const collectResult = addHistory(rarity, item);
   $("new-single").classList.toggle("visible", collectResult.isNew);
+  anticipateCard(front, rarity);
+  if (collectResult.isNew && RARITY_ORDER[rarity] >= RARITY_ORDER.legendary) showCelebration("Major Discovery", item.name);
 
   if (rarity === "legendary" || rarity === "mythic") {
     triggerLegendaryAnimation($("stage-single"), rarity, () => { singleFlipped = true; finishPull(); }, item.banner);
@@ -3475,6 +3568,8 @@ function runTenPullSequence(results, i, onAllDone) {
   } else {
     setTimeout(() => {
       SFX.flip(result.rarity);
+      $("mcf-" + i).classList.add("anticipating");
+      setTimeout(() => $("mcf-" + i).classList.remove("anticipating"), 620);
       $("mc-" + i).classList.add("flipped");
       setTimeout(() => SFX.reveal(result.rarity), 600);
       setTimeout(() => runTenPullSequence(results, i + 1, onAllDone), 160);
@@ -3489,6 +3584,7 @@ function doPull(n) {
   pulling = true;
   pulls -= cost;
   totalPulls += n;
+  flashBannerPullEffect(getActiveBannerId());
   ensurePeriodStats();
   periodStats.dailyPulls += n;
   periodStats.weeklyPulls += n;
@@ -3666,6 +3762,8 @@ function doReset() {
   unlockedBackgrounds = { aetheris: true };
   applyBackground("aetheris");
   periodStats = { dailyKey: "", weeklyKey: "", dailyPulls: 0, dailyRarePlus: 0, weeklyPulls: 0, weeklyNewItems: 0, weeklyLegendaryPlus: 0 };
+  collectionDisplayMode = "grid";
+  favoriteItemName = "";
   playerProfile = { name: "Wandering Summoner", title: "Gate-Touched" };
   friendCodes = [];
   tradeOffers = [];
