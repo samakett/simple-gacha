@@ -1267,8 +1267,8 @@ body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%
 }
 .nav-btn span { font-size: 1.15rem; line-height: 1; }
 .nav-btn.active { border-color: var(--active-banner); box-shadow: 0 0 18px rgba(201,168,76,.18); color: var(--gold); }
-.mission-subnav { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; }
-.mission-subnav .btn { padding: 11px 8px; font-size: .76rem; }
+.mission-subnav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; padding-bottom: 4px; }
+.mission-subnav .btn { padding: 11px 6px; font-size: .72rem; letter-spacing:.08em; min-width:0; }
 @media (max-width: 380px) {
   .bottom-nav { gap: 6px; padding: 8px; }
   .nav-btn { width: 44px; height: 44px; font-size: .44rem; }
@@ -1511,6 +1511,7 @@ body.theme-verdant::after { opacity:.2; background-image: radial-gradient(3px 3p
     <button class="btn" id="mission-tab-daily" onclick="switchMissionPage('daily')">Daily</button>
     <button class="btn" id="mission-tab-weekly" onclick="switchMissionPage('weekly')">Weekly</button>
     <button class="btn" id="mission-tab-lifetime" onclick="switchMissionPage('lifetime')">Lifetime</button>
+    <button class="btn" id="mission-tab-tutorial" onclick="switchMissionPage('tutorial')">Guide</button>
     <button class="btn" id="mission-tab-mastery" onclick="switchMissionPage('mastery')">Mastery</button>
     <button class="btn" id="mission-tab-dupes" onclick="switchMissionPage('dupes')">Dupes</button>
     <button class="btn" id="mission-tab-titles" onclick="switchMissionPage('titles')">Titles</button>
@@ -1760,6 +1761,13 @@ const COMPANIONS = [
   { id: "brine", name: "Brinekit", unlock: "sunken", bonus: "+1 Rare shard on Rare+ duplicates", desc: "Wet, smug, and probably correct." },
   { id: "glimmer", name: "Glimmerpup", unlock: "starter", bonus: "+1 pull from daily first summon", desc: "A good dog made mostly of optimism." },
 ];
+const TUTORIAL_STEPS = [
+  { id: "first-pull", title: "Make a summon", description: "Perform at least one pull.", done: () => totalPulls >= 1 },
+  { id: "first-item", title: "Find a relic", description: "Discover at least one item.", done: () => Object.keys(collection).length >= 1 },
+  { id: "try-ritual", title: "Choose a ritual", description: "Select any non-plain ritual.", done: () => activeRitual !== "none" },
+  { id: "open-codex", title: "Open the Codex", description: "Visit the Collection/Codex page.", done: () => tutorialVisited.codex },
+  { id: "open-missions", title: "Read your tasks", description: "Visit the Missions page.", done: () => tutorialVisited.missions },
+];
 const EVENT_DURATION_DAYS = 40;
 const EVENT_REWARDS = [
   { id: "event-pulls", title: "Festival Pull Bundle", cost: 80, reward: { pulls: 5 } },
@@ -1965,6 +1973,7 @@ let unlockedBackgrounds = { aetheris: true };
 let activeBackground = "aetheris";
 let appSettings = { sound: true, reduceMotion: false, textScale: 1 };
 let tutorialComplete = false;
+let tutorialVisited = { codex: false, missions: false };
 let periodStats = { dailyKey: "", weeklyKey: "", dailyPulls: 0, dailyRarePlus: 0, weeklyPulls: 0, weeklyNewItems: 0, weeklyLegendaryPlus: 0 };
 let collectionSearch = "";
 let collectionDisplayMode = "grid";
@@ -2204,6 +2213,7 @@ function saveState() {
       activeBackground,
       appSettings,
       tutorialComplete,
+      tutorialVisited,
       periodStats,
       collectionDisplayMode,
       favoriteItemName,
@@ -2253,6 +2263,7 @@ function loadState() {
     activeBackground = state.activeBackground || "aetheris";
     appSettings = state.appSettings || appSettings;
     tutorialComplete = state.tutorialComplete || false;
+    tutorialVisited = state.tutorialVisited || tutorialVisited;
     applySettings();
     periodStats = state.periodStats || periodStats;
     collectionDisplayMode = state.collectionDisplayMode || "grid";
@@ -2917,14 +2928,18 @@ function missionComplete(mission) {
   return mission.metric() >= mission.target;
 }
 
+function refreshTasksPage() {
+  renderMissionsPage();
+  requestAnimationFrame(renderMissionsPage);
+}
+
 function claimMission(id) {
   const mission = MISSIONS.find(m => m.id === id);
   if (!mission || claimedMissions[id] || !missionComplete(mission)) return;
   claimedMissions[id] = true;
   applyReward(mission.reward);
   renderProgress();
-  renderMissionsPage();
-  setTimeout(renderMissionsPage, 0);
+  refreshTasksPage();
   saveState();
 }
 
@@ -2945,8 +2960,7 @@ function claimAchievement(bannerId, threshold) {
   claimedAchievements[key] = true;
   applyReward(achievementReward(threshold));
   renderProgress();
-  renderMissionsPage();
-  setTimeout(renderMissionsPage, 0);
+  refreshTasksPage();
   saveState();
 }
 
@@ -2966,6 +2980,7 @@ function renderMissionsPage() {
   if (activeMissionPage === "daily") body.innerHTML = renderMissionGroup("Daily Missions", `resets in ${timeUntilNextDay()}`, DAILY_MISSIONS, claimedDailyMissions, "claimDailyMission");
   else if (activeMissionPage === "weekly") body.innerHTML = renderMissionGroup("Weekly Missions", `resets in ${timeUntilNextWeek()}`, WEEKLY_MISSIONS, claimedWeeklyMissions, "claimWeeklyMission");
   else if (activeMissionPage === "lifetime") body.innerHTML = renderMissionGroup("Lifetime Missions", "always available", MISSIONS, claimedMissions, "claimMission");
+  else if (activeMissionPage === "tutorial") body.innerHTML = renderTutorialPage();
   else if (activeMissionPage === "mastery") body.innerHTML = renderMasteryPage();
   else if (activeMissionPage === "dupes") body.innerHTML = renderDuplicateMilestones();
   else if (activeMissionPage === "titles") body.innerHTML = renderTitlesPage();
@@ -2983,8 +2998,7 @@ function claimDuplicateMilestone(id) {
   if (!milestone || claimedDuplicateMilestones[id] || duplicateCount() < milestone.target) return;
   claimedDuplicateMilestones[id] = true;
   applyReward(milestone.reward);
-  renderMissionsPage();
-  setTimeout(renderMissionsPage, 0);
+  refreshTasksPage();
   saveState();
 }
 
@@ -2998,8 +3012,7 @@ function claimTitleAward(id) {
   if (!award || claimedTitles[id] || award.metric() < award.target) return;
   claimedTitles[id] = true;
   applyReward(award.reward);
-  renderMissionsPage();
-  setTimeout(renderMissionsPage, 0);
+  refreshTasksPage();
   saveState();
 }
 
@@ -3019,8 +3032,7 @@ function claimCodexAward(id) {
   claimedCodexAwards[id] = true;
   showCelebration("Codex Award", award.title);
   applyReward(award.reward);
-  renderMissionsPage();
-  setTimeout(renderMissionsPage, 0);
+  refreshTasksPage();
   saveState();
 }
 
@@ -3039,8 +3051,7 @@ function claimItemSet(id) {
   claimedItemSets[id] = true;
   showCelebration("Set Complete", set.title);
   applyReward(set.reward);
-  renderMissionsPage();
-  setTimeout(renderMissionsPage, 0);
+  refreshTasksPage();
   saveState();
 }
 
@@ -3062,8 +3073,7 @@ function equipCompanion(id) {
   if (!companion || !companionUnlocked(companion)) return;
   unlockedCompanions[id] = true;
   equippedCompanion = id;
-  renderMissionsPage();
-  setTimeout(renderMissionsPage, 0);
+  refreshTasksPage();
   saveState();
 }
 
@@ -3084,6 +3094,23 @@ function showPullRecap(results) {
 function closePullRecap() {
   $("recap-overlay").classList.remove("open");
   document.body.classList.remove("recap-open");
+}
+
+function tutorialReady() {
+  return TUTORIAL_STEPS.every(step => step.done());
+}
+
+function claimTutorialReward() {
+  if (tutorialComplete || !tutorialReady()) return;
+  tutorialComplete = true;
+  applyReward({ pulls: 3 });
+  showCelebration("Tutorial Complete", "+3 pulls");
+  refreshTasksPage();
+  saveState();
+}
+
+function renderTutorialPage() {
+  return `<div class="sum-section-title">Starter Guide</div><div class="progress-list">${TUTORIAL_STEPS.map(step => `<div class="progress-card"><div class="progress-row"><div><div class="progress-title">${step.done() ? "✓ " : "○ "}${step.title}</div><div class="progress-sub">${step.description}</div></div></div></div>`).join("")}<div class="progress-card"><div class="progress-row"><div><div class="progress-title">Complete the guide</div><div class="progress-sub">Reward: 3 pulls</div></div><button class="btn btn-add" onclick="claimTutorialReward()" ${tutorialReady() && !tutorialComplete ? "" : "disabled"}>${tutorialComplete ? "Claimed" : "Claim"}</button></div></div></div>`;
 }
 
 function openProgress() {
@@ -3120,7 +3147,6 @@ function renderMissionGroup(title, countdown, missions, claimedMap, claimFn) {
         }).join("")}
       </div>
     </div>`;
-  $("forge-body").innerHTML = html;
 }
 
 function claimDailyMission(id) {
@@ -3130,8 +3156,7 @@ function claimDailyMission(id) {
   claimedDailyMissions[id] = true;
   applyReward(mission.reward);
   renderProgress();
-  renderMissionsPage();
-  setTimeout(renderMissionsPage, 0);
+  refreshTasksPage();
   saveState();
 }
 
@@ -3142,8 +3167,7 @@ function claimWeeklyMission(id) {
   claimedWeeklyMissions[id] = true;
   applyReward(mission.reward);
   renderProgress();
-  renderMissionsPage();
-  setTimeout(renderMissionsPage, 0);
+  refreshTasksPage();
   saveState();
 }
 
@@ -3177,7 +3201,6 @@ function renderProgress() {
         }).join("")}
       </div>
     </div>`;
-  $("shop-body").innerHTML = html;
 }
 
 function openEvent() {
@@ -3786,6 +3809,7 @@ function doReset() {
   claimedItemSets = {};
   appSettings = { sound: true, reduceMotion: false, textScale: 1 };
   tutorialComplete = false;
+  tutorialVisited = { codex: false, missions: false };
   applySettings();
   unlockedCompanions = { glimmer: true };
   equippedCompanion = "glimmer";
@@ -4285,16 +4309,6 @@ function updateSetting(key, value) {
   renderOnlineHub();
 }
 
-function completeTutorial() {
-  if (tutorialComplete) return;
-  tutorialComplete = true;
-  pulls += 3;
-  showCelebration("Tutorial Complete", "+3 pulls");
-  updateCurrency();
-  saveState();
-  renderOnlineHub();
-}
-
 function resetOnly(system) {
   if (!confirm(`Reset ${system}?`)) return;
   if (system === "history") $("history").innerHTML = "";
@@ -4344,11 +4358,6 @@ function renderOnlineHub() {
       </div>
     </div>
     <div class="page-card" style="margin-bottom:14px">
-      <div class="sum-section-title">Tutorial</div>
-      <div class="online-note">1. Pick a banner. 2. Try a ritual. 3. Pull. 4. Open Codex. 5. Claim a mission.</div>
-      <button class="btn btn-primary" onclick="completeTutorial()" ${tutorialComplete ? "disabled" : ""}>${tutorialComplete ? "Completed" : "Complete Tutorial (+3 pulls)"}</button>
-    </div>
-    <div class="page-card" style="margin-bottom:14px">
       <div class="sum-section-title">Leaderboards</div>
       <div class="progress-list">${localLeaderboardRows().map(row => `<div class="forge-recipe"><div><div class="forge-recipe-title">#${row.rank} ${row.name}</div><div class="forge-recipe-sub">${row.stat}</div></div></div>`).join("")}</div>
     </div>
@@ -4388,6 +4397,8 @@ function renderActivePage() {
 function goToPage(page) {
   if (!APP_PAGES.includes(page)) return;
   activeAppPage = page;
+  if (page === "collection") tutorialVisited.codex = true;
+  if (page === "missions") tutorialVisited.missions = true;
   document.querySelectorAll(".app-page").forEach(el => el.classList.toggle("active", el.dataset.page === page));
   document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.navPage === page));
   renderActivePage();
@@ -4429,7 +4440,7 @@ function initMissionSwipe() {
     const dx = touch.clientX - startX;
     const dy = touch.clientY - startY;
     if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy) * 1.25) return;
-    const pages = ["daily", "weekly", "lifetime", "mastery", "dupes", "titles", "codex", "sets", "companions"];
+    const pages = ["daily", "weekly", "lifetime", "tutorial", "mastery", "dupes", "titles", "codex", "sets", "companions"];
     const idx = pages.indexOf(activeMissionPage);
     const next = Math.max(0, Math.min(pages.length - 1, idx + (dx < 0 ? 1 : -1)));
     switchMissionPage(pages[next]);
