@@ -38,7 +38,7 @@ html {
 
 body {
   min-height: 100%;
-  padding: 32px 18px 72px;
+  padding: 32px 18px 118px;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
@@ -1183,6 +1183,77 @@ body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%
 @keyframes promptPulse { 0%,100% { opacity: .4; } 50% { opacity: 1; } }
 
 
+
+.app-page { display: none; width: 100%; }
+.app-page.active { display: block; }
+.page-shell {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 720px;
+  padding: 28px 18px 112px;
+}
+.page-title {
+  font-family: "Cinzel Decorative", cursive;
+  color: var(--text-hi);
+  font-size: clamp(1.45rem, 6vw, 2.1rem);
+  letter-spacing: .08em;
+  text-align: center;
+  margin-bottom: 6px;
+}
+.page-subtitle {
+  color: #8f7a55;
+  font: italic 1rem "Cormorant Garamond", serif;
+  letter-spacing: .12em;
+  text-align: center;
+  margin-bottom: 18px;
+}
+.page-card {
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  background: rgba(15,15,26,.92);
+  padding: 16px;
+}
+.bottom-nav {
+  position: fixed;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 80;
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border2);
+  border-radius: 999px;
+  background: rgba(7,7,15,.86);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 40px rgba(0,0,0,.45);
+}
+.nav-btn {
+  width: 54px;
+  height: 54px;
+  border: 1px solid var(--border2);
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--text-hi);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font: .55rem "Cinzel", serif;
+  letter-spacing: .04em;
+  cursor: pointer;
+}
+.nav-btn span { font-size: 1.15rem; line-height: 1; }
+.nav-btn.active { border-color: var(--active-banner); box-shadow: 0 0 18px rgba(201,168,76,.18); color: var(--gold); }
+.mission-subnav { display: flex; gap: 8px; margin-bottom: 14px; }
+.mission-subnav .btn { padding: 11px 8px; font-size: .76rem; }
+@media (max-width: 380px) {
+  .bottom-nav { gap: 6px; padding: 8px; }
+  .nav-btn { width: 48px; height: 48px; font-size: .48rem; }
+}
+
 /* Readability pass: favor legibility over density on mobile. */
 .banner-name { font-size: .95rem; }
 .banner-sub { font-size: .86rem; }
@@ -1264,7 +1335,7 @@ body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%
 </style>
 </head>
 <body>
-<div class="wrap" id="wrap">
+<div class="wrap app-page active" id="wrap" data-page="banners">
   <div class="portrait-header">
     <div class="title-ornament">✦ &nbsp; Summoning Gate &nbsp; ✦</div>
     <h1>AETHERIS</h1>
@@ -1340,11 +1411,7 @@ body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%
           <span class="cost">10 pulls</span>
         </button>
       </div>
-      <button class="btn btn-inv" onclick="openInv()">⬡ Collection <span class="inv-badge" id="inv-badge">0</span></button>
-      <button class="btn btn-forge" onclick="openShardForge()">⬡ Shard Forge</button>
       <button class="btn btn-info" onclick="openBannerInfo()">ⓘ Banner Details</button>
-      <button class="btn btn-summary" onclick="openProgress()">◎ Missions</button>
-      <button class="btn btn-summary" onclick="openEvent()">◌ Event</button>
       <button class="btn btn-summary" onclick="openShardShop()">◇ Shard Shop</button>
       <div class="btn-row">
         <button class="btn btn-summary" onclick="openSummary()">◈ Summary</button>
@@ -1371,6 +1438,63 @@ body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%
     <div class="history" id="history"></div>
   </div>
 </div>
+
+<section class="app-page page-shell" id="page-event" data-page="event">
+  <div class="page-title">Current Event</div>
+  <div class="page-subtitle">Festival rewards, sigils, and backgrounds</div>
+  <div id="page-event-body" class="page-card"></div>
+</section>
+
+<section class="app-page page-shell" id="page-missions" data-page="missions">
+  <div class="page-title">Missions</div>
+  <div class="page-subtitle">Swipe daily, weekly, and lifetime tasks</div>
+  <div class="mission-subnav">
+    <button class="btn" id="mission-tab-daily" onclick="switchMissionPage('daily')">Daily</button>
+    <button class="btn" id="mission-tab-weekly" onclick="switchMissionPage('weekly')">Weekly</button>
+    <button class="btn" id="mission-tab-lifetime" onclick="switchMissionPage('lifetime')">Lifetime</button>
+  </div>
+  <div id="page-missions-body" class="page-card"></div>
+</section>
+
+<section class="app-page page-shell" id="page-forge" data-page="forge">
+  <div class="page-title">Forge</div>
+  <div class="page-subtitle">Shard exchange and rotating offers</div>
+  <div id="page-forge-body"></div>
+</section>
+
+<section class="app-page page-shell" id="page-collection" data-page="collection">
+  <div class="page-title">Collection</div>
+  <div class="page-subtitle">Codex, search, and discoveries</div>
+  <div class="page-card">
+    <div class="inv-header" style="padding:0 0 12px;border-bottom:1px solid var(--border)">
+      <span class="inv-title">Collection</span>
+      <span class="inv-stats" id="page-inv-stats">0 unique · 0 total</span>
+    </div>
+    <div class="inv-tabs" style="padding:0">
+      <button class="inv-tab active" id="page-tab-collection" onclick="switchTab('collection')">Collection</button>
+      <button class="inv-tab" id="page-tab-codex" onclick="switchTab('codex')">Codex</button>
+    </div>
+    <div class="inv-filters" style="padding:10px 0 0">
+      <button class="inv-filter active" data-page-banner-filter="all" onclick="switchBannerFilter('all')">All</button>
+      <button class="inv-filter" data-page-banner-filter="aetheris" onclick="switchBannerFilter('aetheris')">Aetheris</button>
+      <button class="inv-filter" data-page-banner-filter="sunken" onclick="switchBannerFilter('sunken')">Sunken</button>
+      <button class="inv-filter" data-page-banner-filter="clockwork" onclick="switchBannerFilter('clockwork')">Clockwork</button>
+    </div>
+    <div class="search-wrap" style="padding:10px 0 0"><input id="page-collection-search" placeholder="Search collection…" oninput="setCollectionSearch(this.value)"></div>
+    <div class="inv-body" id="page-inv-body" style="padding:16px 0 0">
+      <div class="inv-empty" id="page-inv-empty">No items yet. Begin summoning…</div>
+    </div>
+  </div>
+</section>
+
+<nav class="bottom-nav" aria-label="Main pages">
+  <button class="nav-btn active" data-nav-page="banners" onclick="goToPage('banners')"><span>✦</span>Banner</button>
+  <button class="nav-btn" data-nav-page="event" onclick="goToPage('event')"><span>◌</span>Event</button>
+  <button class="nav-btn" data-nav-page="missions" onclick="goToPage('missions')"><span>◎</span>Tasks</button>
+  <button class="nav-btn" data-nav-page="forge" onclick="goToPage('forge')"><span>⬡</span>Forge</button>
+  <button class="nav-btn" data-nav-page="collection" onclick="goToPage('collection')"><span>▣</span>Codex</button>
+</nav>
+
 
 <div class="leg-flash" id="leg-flash"></div>
 <div class="leg-dim" id="leg-dim"></div>
@@ -1722,6 +1846,8 @@ let unlockedBackgrounds = { aetheris: true };
 let activeBackground = "aetheris";
 let periodStats = { dailyKey: "", weeklyKey: "", dailyPulls: 0, dailyRarePlus: 0, weeklyPulls: 0, weeklyNewItems: 0, weeklyLegendaryPlus: 0 };
 let collectionSearch = "";
+let activeAppPage = "banners";
+let activeMissionPage = "daily";
 let totalPulls = 0;
 let totalCollected = 0;
 let singleFlipped = false;
@@ -2024,7 +2150,8 @@ function collectItem(rarity, item) {
 }
 
 function updateInvBadge() {
-  $("inv-badge").textContent = Object.keys(collection).length;
+  const badge = $("inv-badge");
+  if (badge) badge.textContent = Object.keys(collection).length;
 }
 
 function flavorHash(value) {
@@ -2124,7 +2251,8 @@ function clearInventoryBody() {
 
 function updateFilterButtons() {
   document.querySelectorAll(".inv-filter").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.bannerFilter === activeInvBannerFilter);
+    const filter = btn.dataset.bannerFilter || btn.dataset.pageBannerFilter;
+    btn.classList.toggle("active", filter === activeInvBannerFilter);
   });
 }
 
@@ -2133,13 +2261,19 @@ function switchBannerFilter(filter) {
   updateFilterButtons();
   if (activeTab === "collection") renderInv();
   else renderCodex();
+  renderCollectionPage();
   saveState();
 }
 
 function setCollectionSearch(value) {
   collectionSearch = value.trim().toLowerCase();
+  const invSearch = $("collection-search");
+  const pageSearch = $("page-collection-search");
+  if (invSearch && invSearch.value !== value) invSearch.value = value;
+  if (pageSearch && pageSearch.value !== value) pageSearch.value = value;
   if (activeTab === "collection") renderInv();
   else renderCodex();
+  renderCollectionPage();
 }
 
 function matchesCollectionSearch(name) {
@@ -2234,6 +2368,9 @@ function renderBannerInfo() {
         }).join("")}
       </div>
     </div>`;
+  $("event-body").innerHTML = html;
+  const pageBody = $("page-event-body");
+  if (pageBody) pageBody.innerHTML = html;
 }
 
 
@@ -2258,8 +2395,69 @@ function switchTab(tab) {
   activeTab = tab;
   $("tab-collection").classList.toggle("active", tab === "collection");
   $("tab-codex").classList.toggle("active", tab === "codex");
+  const pageCollection = $("page-tab-collection");
+  const pageCodex = $("page-tab-codex");
+  if (pageCollection) pageCollection.classList.toggle("active", tab === "collection");
+  if (pageCodex) pageCodex.classList.toggle("active", tab === "codex");
   if (tab === "collection") renderInv();
   else renderCodex();
+  renderCollectionPage();
+}
+
+function renderCollectionPage() {
+  const body = $("page-inv-body");
+  if (!body) return;
+  updateFilterButtons();
+  const stats = $("page-inv-stats");
+  const emptyText = activeInvBannerFilter === "all" ? "No items yet. Begin summoning…" : `No ${bannerLabel(activeInvBannerFilter)} items yet.`;
+  if (activeTab === "collection") {
+    const entries = collectionEntriesForFilter();
+    const unique = entries.length;
+    const filteredTotal = entries.reduce((sum, [, data]) => sum + data.count, 0);
+    const label = activeInvBannerFilter === "all" ? "all banners" : bannerLabel(activeInvBannerFilter);
+    stats.textContent = `${unique} unique · ${filteredTotal} total · ${label}`;
+    if (!unique) {
+      body.innerHTML = `<div class="inv-empty">${emptyText}</div>`;
+      return;
+    }
+    body.innerHTML = TIERS.map(tier => {
+      const items = entries.filter(([, value]) => value.rarity === tier).sort((a, b) => a[0].localeCompare(b[0]));
+      if (!items.length) return "";
+      return `
+        <div class="inv-tier">
+          <div class="inv-tier-label ${rarityClass(tier)}">◆ ${rarityLabel(tier)}<span class="inv-tier-count">${items.length} item${items.length !== 1 ? "s" : ""}</span></div>
+          <div class="inv-grid">
+            ${items.map(([name, data]) => {
+              const banner = data.banner || findItemMeta(name)?.banner || "aetheris";
+              return `<div class="inv-item" onclick="openItemDetail('${name.replace(/'/g, "\'")}')"><span class="inv-item-count${data.count > 1 ? " many" : ""}">×${data.count}</span><span class="inv-item-icon">${data.icon}</span><span class="inv-item-name ${rarityClass(tier)}">${name}</span><span class="inv-item-source">${bannerLabel(banner)}</span></div>`;
+            }).join("")}
+          </div>
+        </div>`;
+    }).join("");
+  } else {
+    const allItems = catalogItemsForFilter();
+    const unlockedCount = allItems.filter(item => collection[item.name]).length;
+    const label = activeInvBannerFilter === "all" ? "all banners" : bannerLabel(activeInvBannerFilter);
+    stats.textContent = `${unlockedCount} / ${allItems.length} discovered · ${label}`;
+    const pct = allItems.length ? Math.round(unlockedCount / allItems.length * 100) : 0;
+    body.innerHTML = `
+      <div class="cdx-progress"><div style="width:100%;height:3px;background:var(--panel);border-radius:2px;overflow:hidden;margin-bottom:8px"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#5eb4ff,#c084fc,#f97316);border-radius:2px"></div></div>${pct}% discovered · ${unlockedCount} of ${allItems.length} items</div>
+      ${TIERS.map(tier => {
+        const tierItems = allItems.filter(item => item.rarity === tier);
+        if (!tierItems.length) return "";
+        const unlockedInTier = tierItems.filter(item => collection[item.name]).length;
+        return `
+          <div class="inv-tier">
+            <div class="inv-tier-label ${rarityClass(tier)}">◆ ${rarityLabel(tier)}<span class="inv-tier-count">${unlockedInTier} / ${tierItems.length}</span></div>
+            <div class="inv-grid">
+              ${tierItems.map(item => {
+                const owned = collection[item.name];
+                return `<div class="cdx-item ${owned ? "unlocked" : "locked"}" onclick="openItemDetail('${item.name.replace(/'/g, "\'")}')"><span class="cdx-check">✦</span><span class="cdx-item-icon">${item.icon}</span><span class="cdx-item-name ${owned ? rarityClass(tier) : ""}">${owned ? item.name : "???"}</span><span class="inv-item-source">${bannerLabel(item.banner)}</span>${owned && owned.count > 1 ? `<span style="position:absolute;top:5px;left:7px;font-size:.45rem;color:#666;font-family:'Cormorant Garamond',serif">×${owned.count}</span>` : ""}</div>`;
+              }).join("")}
+            </div>
+          </div>`;
+      }).join("")}`;
+  }
 }
 
 function renderInv() {
@@ -2514,6 +2712,7 @@ function claimMission(id) {
   claimedMissions[id] = true;
   applyReward(mission.reward);
   renderProgress();
+  renderMissionsPage();
   saveState();
 }
 
@@ -2534,7 +2733,34 @@ function claimAchievement(bannerId, threshold) {
   claimedAchievements[key] = true;
   applyReward(achievementReward(threshold));
   renderProgress();
+  renderMissionsPage();
   saveState();
+}
+
+function switchMissionPage(page) {
+  activeMissionPage = page;
+  renderMissionsPage();
+}
+
+function renderMissionsPage() {
+  const body = $("page-missions-body");
+  if (!body) return;
+  ensurePeriodStats();
+  ["daily", "weekly", "lifetime"].forEach(page => {
+    const tab = $(`mission-tab-${page}`);
+    if (tab) tab.classList.toggle("btn-primary", page === activeMissionPage);
+  });
+  if (activeMissionPage === "daily") body.innerHTML = renderMissionGroup("Daily Missions", `resets in ${timeUntilNextDay()}`, DAILY_MISSIONS, claimedDailyMissions, "claimDailyMission");
+  else if (activeMissionPage === "weekly") body.innerHTML = renderMissionGroup("Weekly Missions", `resets in ${timeUntilNextWeek()}`, WEEKLY_MISSIONS, claimedWeeklyMissions, "claimWeeklyMission");
+  else body.innerHTML = `
+    ${renderMissionGroup("Lifetime Missions", "always available", MISSIONS, claimedMissions, "claimMission")}
+    <div class="sum-section-title">Banner Mastery</div>
+    <div class="progress-list">
+      ${BANNERS.map(banner => {
+        const pct = bannerCompletionPct(banner.id);
+        return `<div class="progress-card"><div class="progress-title">${banner.name}</div><div class="progress-sub">${bannerDiscoveredCount(banner.id)} / ${bannerCatalogCount(banner.id)} discovered · ${pct}% complete</div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div><div class="forge-recipes" style="margin-top:10px">${ACHIEVEMENT_THRESHOLDS.map(threshold => { const key = achievementKey(banner.id, threshold); const canClaim = pct >= threshold && !claimedAchievements[key]; return `<div class="forge-recipe"><div><div class="forge-recipe-title">${threshold}% Mastery</div><div class="forge-recipe-sub">Reward: ${rewardText(achievementReward(threshold))}</div></div><button class="btn btn-add" onclick="claimAchievement('${banner.id}', ${threshold})" ${canClaim ? "" : "disabled"}>${claimedAchievements[key] ? "Claimed" : "Claim"}</button></div>`; }).join("")}</div></div>`;
+      }).join("")}
+    </div>`;
 }
 
 function openProgress() {
@@ -2571,6 +2797,7 @@ function renderMissionGroup(title, countdown, missions, claimedMap, claimFn) {
         }).join("")}
       </div>
     </div>`;
+  $("forge-body").innerHTML = html;
 }
 
 function claimDailyMission(id) {
@@ -2580,6 +2807,7 @@ function claimDailyMission(id) {
   claimedDailyMissions[id] = true;
   applyReward(mission.reward);
   renderProgress();
+  renderMissionsPage();
   saveState();
 }
 
@@ -2590,6 +2818,7 @@ function claimWeeklyMission(id) {
   claimedWeeklyMissions[id] = true;
   applyReward(mission.reward);
   renderProgress();
+  renderMissionsPage();
   saveState();
 }
 
@@ -2623,6 +2852,7 @@ function renderProgress() {
         }).join("")}
       </div>
     </div>`;
+  $("shop-body").innerHTML = html;
 }
 
 function openEvent() {
@@ -2649,7 +2879,7 @@ function claimEventReward(id) {
 }
 
 function renderEvent() {
-  $("event-body").innerHTML = `
+  const html = `
     <div class="event-hero">
       <div class="event-title">Festival of Falling Stars</div>
       <div class="event-currency">✦ ${eventCurrency} event sigils</div>
@@ -2668,6 +2898,9 @@ function renderEvent() {
       ${["aetheris", "sunken", "clockwork", "verdant"].map(theme => `
         <button class="btn ${activeBackground === theme ? "btn-primary" : ""}" onclick="setBackgroundTheme('${theme}')" ${unlockedBackgrounds[theme] ? "" : "disabled"}>${theme.charAt(0).toUpperCase()+theme.slice(1)}</button>`).join("")}
     </div>`;
+  $("event-body").innerHTML = html;
+  const pageBody = $("page-event-body");
+  if (pageBody) pageBody.innerHTML = html;
 }
 
 function setBackgroundTheme(theme) {
@@ -2698,11 +2931,12 @@ function buyShopOffer(id) {
   shopPurchases[key] = true;
   applyReward(offer.reward);
   renderShardShop();
+  renderForgePage();
   saveState();
 }
 
 function renderShardShop() {
-  $("shop-body").innerHTML = `
+  const html = `
     <div class="forge-note">Offers rotate daily. Next rotation in ${timeUntilNextDay()}.</div>
     <div class="progress-list">
       ${visibleShopOffers().map(offer => {
@@ -2714,6 +2948,23 @@ function renderShardShop() {
             <button class="btn btn-add" onclick="buyShopOffer('${offer.id}')" ${canBuy ? "" : "disabled"}>${shopPurchases[key] ? "Bought" : "Buy"}</button>
           </div>`;
       }).join("")}
+    </div>`;
+  $("shop-body").innerHTML = html;
+}
+
+function renderForgePage() {
+  const page = $("page-forge-body");
+  if (!page) return;
+  renderShardForge();
+  renderShardShop();
+  page.innerHTML = `
+    <div class="page-card" style="margin-bottom:14px">
+      <div class="sum-section-title">Shard Forge</div>
+      ${$("forge-body").innerHTML}
+    </div>
+    <div class="page-card">
+      <div class="sum-section-title">Rotating Shop</div>
+      ${$("shop-body").innerHTML}
     </div>`;
 }
 
@@ -3054,7 +3305,7 @@ function closeShardForge() {
 }
 
 function renderShardForge() {
-  $("forge-body").innerHTML = `
+  const html = `
     <div class="forge-note">Duplicate pulls are melted into rarity shards. Trade them here for extra pulls when the collection gives you repeats.</div>
     <div class="info-grid">
       ${TIERS.map(rarity => `
@@ -3077,6 +3328,7 @@ function renderShardForge() {
           </div>`;
       }).join("")}
     </div>`;
+  $("forge-body").innerHTML = html;
 }
 
 function redeemShardRecipe(rarity) {
@@ -3087,6 +3339,7 @@ function redeemShardRecipe(rarity) {
   SFX.addPulls();
   updateCurrency();
   renderShardForge();
+  renderForgePage();
   saveState();
 }
 
@@ -3556,6 +3809,66 @@ function setNotice(msg) {
   $("exp-notice").textContent = msg;
 }
 
+const APP_PAGES = ["banners", "event", "missions", "forge", "collection"];
+
+function renderActivePage() {
+  if (activeAppPage === "event") renderEvent();
+  else if (activeAppPage === "missions") renderMissionsPage();
+  else if (activeAppPage === "forge") renderForgePage();
+  else if (activeAppPage === "collection") renderCollectionPage();
+}
+
+function goToPage(page) {
+  if (!APP_PAGES.includes(page)) return;
+  activeAppPage = page;
+  document.querySelectorAll(".app-page").forEach(el => el.classList.toggle("active", el.dataset.page === page));
+  document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.navPage === page));
+  renderActivePage();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function initAppPageSwipe() {
+  let startX = 0, startY = 0;
+  document.addEventListener("touchstart", event => {
+    if (event.target.closest && event.target.closest("#banner-switcher")) return;
+    const touch = event.touches[0];
+    startX = touch.clientX;
+    startY = touch.clientY;
+  }, { passive: true });
+  document.addEventListener("touchend", event => {
+    if (!startX) return;
+    if (event.target.closest && event.target.closest("#banner-switcher")) return;
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - startX;
+    const dy = touch.clientY - startY;
+    startX = 0;
+    if (Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy) * 1.25) return;
+    const idx = APP_PAGES.indexOf(activeAppPage);
+    const next = Math.max(0, Math.min(APP_PAGES.length - 1, idx + (dx < 0 ? 1 : -1)));
+    goToPage(APP_PAGES[next]);
+  }, { passive: true });
+}
+
+function initMissionSwipe() {
+  const page = $("page-missions");
+  if (!page) return;
+  let startX = 0, startY = 0;
+  page.addEventListener("touchstart", event => {
+    const touch = event.touches[0];
+    startX = touch.clientX; startY = touch.clientY;
+  }, { passive: true });
+  page.addEventListener("touchend", event => {
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - startX;
+    const dy = touch.clientY - startY;
+    if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy) * 1.25) return;
+    const pages = ["daily", "weekly", "lifetime"];
+    const idx = pages.indexOf(activeMissionPage);
+    const next = Math.max(0, Math.min(pages.length - 1, idx + (dx < 0 ? 1 : -1)));
+    switchMissionPage(pages[next]);
+  }, { passive: true });
+}
+
 function initBannerSwipe() {
   const switcher = $("banner-switcher");
   if (!switcher) return;
@@ -3584,6 +3897,9 @@ updateInvBadge();
 updateShardWallet();
 updateCurrency();
 initBannerSwipe();
+initAppPageSwipe();
+initMissionSwipe();
+goToPage("banners");
 </script>
 </body>
 </html>
