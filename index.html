@@ -541,8 +541,9 @@ h1 {
   box-shadow: 0 0 6px rgba(192,132,252,.4);
   transition: width .5s cubic-bezier(.4,0,.2,1);
 }
-.pity-bar-fill.sunken { background: linear-gradient(90deg, #2dd4bf, #0d9488); }
-.pity-bar-fill.clockwork { background: linear-gradient(90deg, #d6a35b, #8b5a2b); }
+.pity-bar-fill.aetheris { background: linear-gradient(90deg, #5eb4ff, #c084fc, #f97316); }
+.pity-bar-fill.sunken { background: linear-gradient(90deg, #164e63, #2dd4bf, #a7f3d0); }
+.pity-bar-fill.clockwork { background: linear-gradient(90deg, #4b2e16, #d6a35b, #fde68a); }
 .pity-bar-fill.warn { animation: pityPulse 1.2s ease-in-out infinite; box-shadow: 0 0 10px rgba(249,115,22,.6); }
 .pity-bar-fill.danger {
   background: linear-gradient(90deg, #f97316, #fbbf24) !important;
@@ -1347,6 +1348,7 @@ h1 {
       <button class="btn btn-inv" onclick="openInv()">⬡ Collection <span class="inv-badge" id="inv-badge">0</span></button>
       <button class="btn btn-forge" onclick="openShardForge()">⬡ Shard Forge</button>
       <button class="btn btn-info" onclick="openBannerInfo()">ⓘ Banner Details</button>
+      <button class="btn" onclick="enableSound()">🔊 Enable Sound</button>
       <button class="btn btn-summary" onclick="openProgress()">◎ Progress</button>
       <div class="btn-row">
         <button class="btn btn-summary" onclick="openSummary()">◈ Summary</button>
@@ -1480,10 +1482,10 @@ const RATES = { mythic: .0002, legendary: .02, epic: .08, rare: .20, common: .69
 const SHARD_VALUES = { common: 1, rare: 3, epic: 10, legendary: 40, mythic: 100 };
 const SHARD_RECIPES = [
   { rarity: "common", cost: 25, pulls: 1 },
-  { rarity: "rare", cost: 15, pulls: 2 },
-  { rarity: "epic", cost: 8, pulls: 5 },
-  { rarity: "legendary", cost: 4, pulls: 15 },
-  { rarity: "mythic", cost: 1, pulls: 25 },
+  { rarity: "rare", cost: 30, pulls: 2 },
+  { rarity: "epic", cost: 60, pulls: 5 },
+  { rarity: "legendary", cost: 160, pulls: 10 },
+  { rarity: "mythic", cost: 250, pulls: 25 },
 ];
 const MISSIONS = [
   { id: "first-summon", title: "Open the Gate", description: "Perform your first summon.", target: 1, metric: () => totalPulls, reward: { pulls: 3 } },
@@ -1845,6 +1847,7 @@ function selectBanner(index, playSound = true) {
   $("banner-track").style.transform = `translateX(-${nextIndex * 100}%)`;
   document.querySelectorAll(".banner-card").forEach((el, i) => el.classList.toggle("active", i === nextIndex));
   document.querySelectorAll(".banner-dot").forEach((el, i) => el.classList.toggle("active", i === nextIndex));
+  $("pity-bar").classList.toggle("aetheris", banner.id === "aetheris");
   $("pity-bar").classList.toggle("sunken", banner.id === "sunken");
   $("pity-bar").classList.toggle("clockwork", banner.id === "clockwork");
   setActiveBannerAccent();
@@ -1953,38 +1956,56 @@ function flavorPick(item, list, offset = 0) {
 }
 
 function itemFlavor(item, owned) {
-  const openings = [
-    "Adventure looks better carrying this",
-    "A small warning label would ruin the mystique",
-    "Heroes tend to overpack; this is why",
-    "It has absolutely seen worse decisions than yours",
-    "The previous owner left no instructions, only confidence",
-    "A fine answer to a question nobody should ask twice",
-    "Some treasures whisper; this one clears its throat",
-    "A pocket-sized invitation to make history nervous",
-    "It insists the dramatic lighting is necessary",
-    "Useful, stylish, and only mildly judgmental",
-  ];
-  const rarities = {
-    common: ["simple enough to trust", "humble but stubborn", "built for bad weather and worse plans", "ordinary until the moment it matters"],
-    rare: ["bright with borrowed luck", "just flashy enough to start rumors", "made for bold hands", "a little too proud to be practical"],
-    epic: ["dangerously eager", "full of stormy opinions", "the sort of thing bards exaggerate accurately", "barely pretending to behave"],
-    legendary: ["famous before you found it", "heavy with applause and consequences", "the centerpiece of at least three arguments", "too important to leave unattended"],
-    mythic: ["less discovered than agreed with", "the kind of miracle that needs supervision", "older than the rules around it", "a destiny wearing an object as a disguise"],
+  const word = item.name.split(/\s+/).find(part => part.length > 4)?.replace(/[^A-Za-z']/g, "") || item.name.split(/\s+/)[0];
+  const seed = flavorHash(`${item.banner}:${item.rarity}:${item.name}`);
+  const shape = seed % 14;
+  const verbs = ["dares", "winks", "waits", "sparkles", "growls", "wanders", "argues", "marches", "sings", "broods", "promises", "misbehaves", "glimmers", "smirks"];
+  const nouns = ["trouble", "glory", "a shortcut", "a miracle", "one more chance", "better weather", "a dramatic entrance", "a narrow escape", "a clever lie", "a brave mistake", "applause", "a secret", "good luck", "bad advice"];
+  const jokes = ["Pack snacks", "Try not to look too responsible", "Heroism sold separately", "No refunds after prophecy", "Probably not cursed", "Ask it nicely", "Looks legal enough", "Cape optional", "Do not taunt it", "Excellent for Tuesdays", "Very convincing in moonlight", "Keep your eyebrows clear", "Trust the sparkle", "Blame the bard"];
+  const moods = {
+    common: ["plainspoken", "stubborn", "scrappy", "reliable"],
+    rare: ["bold", "bright", "quick-tempered", "lucky"],
+    epic: ["dramatic", "restless", "storm-charged", "reckless"],
+    legendary: ["magnificent", "notorious", "commanding", "impossible to ignore"],
+    mythic: ["unreasonable", "world-bending", "alarmingly calm", "older than patience"],
   }[item.rarity];
-  const punchlines = [
-    "Do not lend it to anyone with a cape",
-    "Best used before common sense returns",
-    "Pairs well with impossible odds",
-    "May attract rivals, mentors, or suspicious birds",
-    "If it starts glowing, act like you meant that",
-    "Keep away from prophecies unless supervised",
-    "Not responsible for sudden theme music",
-    "Probably worth the trouble",
-    "Approved by no guild and several legends",
-    "Looks excellent in a last stand",
+  const lines = [
+    `${word} ${verbs[shape]} at ${nouns[(shape + 3) % nouns.length]}. ${jokes[(shape + 5) % jokes.length]}.`,
+    `A ${moods[shape % moods.length]} little answer to ${nouns[(shape + 7) % nouns.length]}. ${jokes[(shape + 1) % jokes.length]}.`,
+    `For when courage needs ${nouns[(shape + 2) % nouns.length]} and a better hat. ${jokes[(shape + 8) % jokes.length]}.`,
+    `${word} knows exactly when to ${verbs[(shape + 4) % verbs.length]}. ${jokes[(shape + 9) % jokes.length]}.`,
+    `Small enough to carry, ${moods[(shape + 1) % moods.length]} enough to brag about. ${jokes[(shape + 10) % jokes.length]}.`,
+    `The sort of prize that makes ${nouns[(shape + 6) % nouns.length]} look planned. ${jokes[(shape + 11) % jokes.length]}.`,
+    `A pocket-sized excuse for ${nouns[(shape + 4) % nouns.length]}. ${jokes[(shape + 12) % jokes.length]}.`,
+    `${word} refuses to be background decoration. ${jokes[(shape + 13) % jokes.length]}.`,
+    `A ${moods[(shape + 2) % moods.length]} companion for questionable maps. ${jokes[(shape + 2) % jokes.length]}.`,
+    `When destiny knocks, this answers with ${nouns[(shape + 9) % nouns.length]}. ${jokes[(shape + 3) % jokes.length]}.`,
+    `${word} has main-character posture. ${jokes[(shape + 4) % jokes.length]}.`,
+    `A fine way to turn ${nouns[(shape + 1) % nouns.length]} into a plan. ${jokes[(shape + 6) % jokes.length]}.`,
+    `Looks harmless. That is almost certainly strategic. ${jokes[(shape + 7) % jokes.length]}.`,
+    `${word} brings ${nouns[(shape + 8) % nouns.length]} and refuses to elaborate. ${jokes[(shape + 12) % jokes.length]}.`,
+    `Somewhere, a sensible person just sighed. ${word} approves.`,
+    `The manual simply says: "Aim toward legend." ${jokes[(shape + 1) % jokes.length]}.`,
+    `${word} makes a strong case for reckless optimism. ${jokes[(shape + 2) % jokes.length]}.`,
+    `A tiny monument to ${nouns[(shape + 5) % nouns.length]}. ${jokes[(shape + 3) % jokes.length]}.`,
+    `It has the confidence of a much larger object. ${jokes[(shape + 4) % jokes.length]}.`,
+    `Perfect for plans containing the phrase "what could happen?"`,
+    `${word} seems harmless until the room gets quiet. ${jokes[(shape + 6) % jokes.length]}.`,
+    `A surprisingly persuasive argument for ${nouns[(shape + 10) % nouns.length]}.`,
+    `This is how trouble dresses for a formal occasion. ${jokes[(shape + 8) % jokes.length]}.`,
+    `${word} would like a better wielder, but you will do.`,
+    `A charming way to make caution feel underdressed.`,
+    `It knows a shortcut through fear. ${jokes[(shape + 9) % jokes.length]}.`,
+    `The brave call it useful. The wise call it loud.`,
+    `A little sparkle, a little menace, excellent posture.`,
+    `${word} has never once apologized for being dramatic.`,
+    `Destiny left this lying around and looked innocent.`,
+    `When the plan fails, wave this confidently.`,
+    `A very small object with very large opinions.`,
+    `It makes "probably" sound like a battle cry.`,
   ];
-  return `${item.name}: ${flavorPick(item, openings)}; ${flavorPick(item, rarities, 5)}. ${flavorPick(item, punchlines, 11)}.`;
+  const variant = seed % lines.length;
+  return `${item.name}: ${lines[variant]}`;
 }
 
 function openItemDetail(name) {
@@ -2621,9 +2642,8 @@ function doTenPull() {
   });
   lastResults = results;
   const grid = $("stage-multi");
-  grid.innerHTML = "";
+  grid.innerHTML = results.map((_, i) => buildMiniCard(i)).join("");
   for (let i = 0; i < 10; i++) {
-    grid.innerHTML += buildMiniCard(i);
     fillMiniCard(i, results[i].rarity, results[i].item, results[i].isNew);
     $("mc-wrap-" + i).addEventListener("click", () => openPullViewer(results[i]));
   }
@@ -3163,6 +3183,15 @@ function openPullViewer(result) {
 
 function closePullViewer() {
   $("pull-view-overlay").classList.remove("open");
+}
+
+function enableSound() {
+  unlockAudio();
+  const c = audioCtx();
+  if (c && c.resume) c.resume().catch(() => {});
+  audioUnlocked = true;
+  tone(880, "sine", .08, 0, .08);
+  tone(1175, "sine", .06, .08, .12);
 }
 
 function initAudioUnlock() {
