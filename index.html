@@ -941,22 +941,26 @@ h1 {
 
 .forge-note { color: #8f887a; font: italic 1rem "Cormorant Garamond", serif; line-height: 1.4; }
 .forge-recipes { display: flex; flex-direction: column; gap: 10px; }
-.forge-recipe { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel); }
-.forge-recipe-title { font-size: .82rem; letter-spacing: .08em; }
-.forge-recipe-sub { margin-top: 4px; color: #666; font: italic .82rem "Cormorant Garamond", serif; }
+.forge-recipe { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel); }
+.forge-recipe-title { font-size: .96rem; letter-spacing: .04em; line-height:1.25; overflow-wrap:anywhere; }
+.forge-recipe-sub { margin-top: 4px; color: #666; font: italic .9rem "Cormorant Garamond", serif; line-height:1.35; overflow-wrap:anywhere; }
 .progress-card { padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel); }
-.progress-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
-.progress-title { color: var(--text-hi); font-size: .88rem; letter-spacing: .08em; }
-.progress-sub { margin-top: 4px; color: #777; font: italic .84rem "Cormorant Garamond", serif; }
+.progress-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.progress-title { color: var(--text-hi); font-size: 1rem; letter-spacing: .04em; line-height: 1.25; overflow-wrap:anywhere; }
+.progress-sub { margin-top: 4px; color: #777; font: italic .92rem "Cormorant Garamond", serif; line-height:1.35; overflow-wrap:anywhere; }
 .progress-bar { height: 5px; margin-top: 9px; border-radius: 999px; background: #171724; overflow: hidden; }
 .progress-fill { height: 100%; border-radius: 999px; background: var(--active-banner); transition: width .4s ease; }
 .progress-list { display: flex; flex-direction: column; gap: 10px; }
 .bonus-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
 .recap-overlay { position: fixed; inset: 0; z-index: 58; background: rgba(0,0,0,.76); backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity .25s ease; display: flex; align-items: flex-end; }
 .recap-overlay.open { opacity: 1; pointer-events: all; }
+body.recap-open #btn-export, body.recap-open .btn-export { opacity:.35; pointer-events:none; }
 .recap-card { width: 100%; max-height: calc(86vh - 86px); overflow-y: auto; border-top: 1px solid var(--border2); border-radius: 22px 22px 0 0; background: #09090f; padding: 20px 18px calc(110px + env(safe-area-inset-bottom)); box-shadow: 0 -20px 60px rgba(0,0,0,.7); }
-.recap-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; margin: 12px 0; }
-.recap-mini { aspect-ratio: 2/3; border: 1px solid var(--border2); border-radius: 9px; background: var(--panel); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: .62rem; text-align: center; }
+.recap-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 14px 0; }
+.recap-mini { min-height: 138px; border: 1px solid currentColor; border-radius: 12px; background: var(--panel); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-size: .76rem; text-align: center; padding: 10px; position: relative; overflow: hidden; }
+.recap-mini-icon { font-size: 2.5rem; filter: drop-shadow(0 0 10px currentColor); position: relative; z-index:1; }
+.recap-mini-name { color: var(--text-hi); font: 700 .9rem "Cormorant Garamond", serif; line-height:1.1; position:relative; z-index:1; }
+.recap-mini-tag { font-size:.62rem; letter-spacing:.12em; text-transform:uppercase; position:relative; z-index:1; }
 .ritual-panel { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 8px; }
 .ritual-card { padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel); cursor: pointer; }
 .ritual-card.active { border-color: var(--active-banner); background: rgba(201,168,76,.08); }
@@ -973,6 +977,8 @@ h1 {
 body.theme-aetheris::before { filter: none; }
 body.theme-sunken::before { background-image: radial-gradient(ellipse at 50% 0%, rgba(45,212,191,.16) 0%, transparent 62%), radial-gradient(1px 1px at 18% 28%, rgba(167,243,208,.24) 0%, transparent 100%), radial-gradient(1px 1px at 70% 65%, rgba(45,212,191,.18) 0%, transparent 100%); }
 body.theme-clockwork::before { background-image: radial-gradient(ellipse at 50% 0%, rgba(214,163,91,.18) 0%, transparent 62%), repeating-linear-gradient(45deg, rgba(214,163,91,.025) 0 1px, transparent 1px 18px), radial-gradient(1px 1px at 80% 20%, rgba(253,230,138,.22) 0%, transparent 100%); }
+body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after { animation-duration: .001s !important; transition-duration: .001s !important; }
+html { font-size: calc(16px * var(--text-scale, 1)); }
 body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%, rgba(74,222,128,.15) 0%, transparent 62%), radial-gradient(1px 1px at 25% 35%, rgba(187,247,208,.22) 0%, transparent 100%), radial-gradient(1px 1px at 75% 70%, rgba(34,197,94,.14) 0%, transparent 100%); }
 .sum-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .sum-stat {
@@ -1221,6 +1227,7 @@ body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%
   text-align: center;
   margin-bottom: 18px;
 }
+.mission-page-card { margin-left: -10px; margin-right: -10px; }
 .page-card {
   border: 1px solid var(--border2);
   border-radius: 16px;
@@ -1511,7 +1518,7 @@ body.theme-verdant::after { opacity:.2; background-image: radial-gradient(3px 3p
     <button class="btn" id="mission-tab-sets" onclick="switchMissionPage('sets')">Sets</button>
     <button class="btn" id="mission-tab-companions" onclick="switchMissionPage('companions')">Familiars</button>
   </div>
-  <div id="page-missions-body" class="page-card"></div>
+  <div id="page-missions-body" class="page-card mission-page-card"></div>
 </section>
 
 <section class="app-page page-shell" id="page-forge" data-page="forge">
@@ -1956,6 +1963,8 @@ let claimedEventRewards = {};
 let shopPurchases = {};
 let unlockedBackgrounds = { aetheris: true };
 let activeBackground = "aetheris";
+let appSettings = { sound: true, reduceMotion: false, textScale: 1 };
+let tutorialComplete = false;
 let periodStats = { dailyKey: "", weeklyKey: "", dailyPulls: 0, dailyRarePlus: 0, weeklyPulls: 0, weeklyNewItems: 0, weeklyLegendaryPlus: 0 };
 let collectionSearch = "";
 let collectionDisplayMode = "grid";
@@ -2094,7 +2103,7 @@ function noise(gainVal, startDelay, duration) {
 }
 
 const SFX = {
-  click() { unlockAudio(); tone(600, "square", .07, 0, .04); tone(400, "square", .04, .03, .03); },
+  click() { if (!appSettings.sound) return; unlockAudio(); tone(600, "square", .07, 0, .04); tone(400, "square", .04, .03, .03); },
   flip(r) {
     const f = { common: 280, rare: 440, epic: 580, legendary: 760, mythic: 860 }[r] || 280;
     noise(.03, 0, .06);
@@ -2193,6 +2202,8 @@ function saveState() {
       shopPurchases,
       unlockedBackgrounds,
       activeBackground,
+      appSettings,
+      tutorialComplete,
       periodStats,
       collectionDisplayMode,
       favoriteItemName,
@@ -2240,6 +2251,9 @@ function loadState() {
     shopPurchases = state.shopPurchases || {};
     unlockedBackgrounds = state.unlockedBackgrounds || { aetheris: true };
     activeBackground = state.activeBackground || "aetheris";
+    appSettings = state.appSettings || appSettings;
+    tutorialComplete = state.tutorialComplete || false;
+    applySettings();
     periodStats = state.periodStats || periodStats;
     collectionDisplayMode = state.collectionDisplayMode || "grid";
     favoriteItemName = state.favoriteItemName || "";
@@ -2581,8 +2595,15 @@ function setCollectionDisplayMode(mode) {
 
 function setFavoriteItem(name) {
   if (!collection[name]) return;
-  favoriteItemName = name;
-  showCelebration("Favorite Set", name);
+  if (favoriteItemName === name) {
+    if (confirm(`Remove ${name} as your favorite?`)) {
+      favoriteItemName = "";
+      showCelebration("Favorite Removed", name);
+    }
+  } else {
+    favoriteItemName = name;
+    showCelebration("Favorite Set", name);
+  }
   renderCollectionPage();
   saveState();
 }
@@ -2903,6 +2924,7 @@ function claimMission(id) {
   applyReward(mission.reward);
   renderProgress();
   renderMissionsPage();
+  setTimeout(renderMissionsPage, 0);
   saveState();
 }
 
@@ -2924,6 +2946,7 @@ function claimAchievement(bannerId, threshold) {
   applyReward(achievementReward(threshold));
   renderProgress();
   renderMissionsPage();
+  setTimeout(renderMissionsPage, 0);
   saveState();
 }
 
@@ -2961,6 +2984,7 @@ function claimDuplicateMilestone(id) {
   claimedDuplicateMilestones[id] = true;
   applyReward(milestone.reward);
   renderMissionsPage();
+  setTimeout(renderMissionsPage, 0);
   saveState();
 }
 
@@ -2975,6 +2999,7 @@ function claimTitleAward(id) {
   claimedTitles[id] = true;
   applyReward(award.reward);
   renderMissionsPage();
+  setTimeout(renderMissionsPage, 0);
   saveState();
 }
 
@@ -2995,6 +3020,7 @@ function claimCodexAward(id) {
   showCelebration("Codex Award", award.title);
   applyReward(award.reward);
   renderMissionsPage();
+  setTimeout(renderMissionsPage, 0);
   saveState();
 }
 
@@ -3014,6 +3040,7 @@ function claimItemSet(id) {
   showCelebration("Set Complete", set.title);
   applyReward(set.reward);
   renderMissionsPage();
+  setTimeout(renderMissionsPage, 0);
   saveState();
 }
 
@@ -3036,6 +3063,7 @@ function equipCompanion(id) {
   unlockedCompanions[id] = true;
   equippedCompanion = id;
   renderMissionsPage();
+  setTimeout(renderMissionsPage, 0);
   saveState();
 }
 
@@ -3048,12 +3076,14 @@ function showPullRecap(results) {
   const shards = results.reduce((sum, r) => sum + (r.shardsAwarded || 0), 0);
   const best = results.reduce((b, r) => RARITY_ORDER[r.rarity] > RARITY_ORDER[b.rarity] ? r : b, results[0]);
   const overlay = $("recap-overlay");
-  overlay.innerHTML = `<div class="recap-card" onclick="event.stopPropagation()"><div class="sum-section-title">Pull Recap</div><div class="sum-best"><span class="sum-best-icon ${rarityClass(best.rarity)}">${best.item.icon}</span><div class="sum-best-info"><div class="sum-best-name">${best.item.name}</div><div class="sum-best-rarity ${rarityClass(best.rarity)}">Best Pull · ${rarityLabel(best.rarity)}</div><div class="sum-best-pull">${newItems.length} new · ${shards} shards · ${getActiveRitual().title}</div></div></div><div class="recap-grid">${results.map(r => `<div class="recap-mini ${rarityClass(r.rarity)}"><span style="font-size:1.4rem">${r.item.icon}</span><span>${r.isNew ? "NEW" : r.shardsAwarded ? `+${r.shardsAwarded}` : rarityLabel(r.rarity).slice(0,3)}</span></div>`).join("")}</div><button class="btn btn-primary" onclick="closePullRecap()">Continue</button></div>`;
+  overlay.innerHTML = `<div class="recap-card" onclick="event.stopPropagation()"><div class="sum-section-title">Pull Recap</div><div class="sum-best"><span class="sum-best-icon ${rarityClass(best.rarity)}">${best.item.icon}</span><div class="sum-best-info"><div class="sum-best-name">${best.item.name}</div><div class="sum-best-rarity ${rarityClass(best.rarity)}">Best Pull · ${rarityLabel(best.rarity)}</div><div class="sum-best-pull">${newItems.length} new · ${shards} shards · ${getActiveRitual().title}</div></div></div><div class="recap-grid">${results.map(r => `<div class="recap-mini ${rarityClass(r.rarity)}"><div class="rarity-glow ${glowClass(r.rarity)}" style="opacity:1"></div><div class="recap-mini-icon ${rarityClass(r.rarity)}">${r.item.icon}</div><div class="recap-mini-name">${r.item.name}</div><div class="recap-mini-tag ${rarityClass(r.rarity)}">${r.isNew ? "NEW" : r.shardsAwarded ? `+${r.shardsAwarded} shards` : rarityLabel(r.rarity)}</div></div>`).join("")}</div><button class="btn btn-primary" onclick="closePullRecap()">Continue</button></div>`;
+  document.body.classList.add("recap-open");
   overlay.classList.add("open");
 }
 
 function closePullRecap() {
   $("recap-overlay").classList.remove("open");
+  document.body.classList.remove("recap-open");
 }
 
 function openProgress() {
@@ -3101,6 +3131,7 @@ function claimDailyMission(id) {
   applyReward(mission.reward);
   renderProgress();
   renderMissionsPage();
+  setTimeout(renderMissionsPage, 0);
   saveState();
 }
 
@@ -3112,6 +3143,7 @@ function claimWeeklyMission(id) {
   applyReward(mission.reward);
   renderProgress();
   renderMissionsPage();
+  setTimeout(renderMissionsPage, 0);
   saveState();
 }
 
@@ -3752,6 +3784,9 @@ function doReset() {
   claimedTitles = {};
   claimedCodexAwards = {};
   claimedItemSets = {};
+  appSettings = { sound: true, reduceMotion: false, textScale: 1 };
+  tutorialComplete = false;
+  applySettings();
   unlockedCompanions = { glimmer: true };
   equippedCompanion = "glimmer";
   activeRitual = "none";
@@ -3994,6 +4029,7 @@ function drawStar(ctx2d, x, y, r1, r2, pts) {
 }
 
 function openCollectionExport() {
+  if (document.body.classList.contains("recap-open")) return;
   SFX.click();
   renderCollectionExportCard();
   $("exp-overlay").classList.add("open");
@@ -4028,7 +4064,7 @@ function renderCollectionExportCard() {
 }
 
 function openExport() {
-  if (!lastResults.length) return;
+  if (document.body.classList.contains("recap-open") || !lastResults.length) return;
   SFX.click();
   renderExportCard(lastResults);
   $("exp-overlay").classList.add("open");
@@ -4237,6 +4273,39 @@ function generateValidationReceipt() {
   renderOnlineHub();
 }
 
+function applySettings() {
+  document.documentElement.style.setProperty("--text-scale", appSettings.textScale || 1);
+  document.body.classList.toggle("reduce-motion", Boolean(appSettings.reduceMotion));
+}
+
+function updateSetting(key, value) {
+  appSettings[key] = value;
+  applySettings();
+  saveState();
+  renderOnlineHub();
+}
+
+function completeTutorial() {
+  if (tutorialComplete) return;
+  tutorialComplete = true;
+  pulls += 3;
+  showCelebration("Tutorial Complete", "+3 pulls");
+  updateCurrency();
+  saveState();
+  renderOnlineHub();
+}
+
+function resetOnly(system) {
+  if (!confirm(`Reset ${system}?`)) return;
+  if (system === "history") $("history").innerHTML = "";
+  if (system === "missions") { claimedMissions = {}; claimedDailyMissions = {}; claimedWeeklyMissions = {}; claimedAchievements = {}; claimedDuplicateMilestones = {}; claimedTitles = {}; claimedCodexAwards = {}; claimedItemSets = {}; }
+  if (system === "shards") shardBalances = makeShardState(0);
+  if (system === "pity") resetPityState();
+  updateCurrency();
+  saveState();
+  renderOnlineHub();
+}
+
 function renderOnlineHub() {
   const body = $("page-online-body");
   if (!body) return;
@@ -4257,12 +4326,35 @@ function renderOnlineHub() {
       <div class="progress-sub">Showcase: ${playerProfile.name} · ${playerProfile.title} · ${luckRating().label}</div>
     </div>
     <div class="page-card" style="margin-bottom:14px">
+      <div class="sum-section-title">Settings</div>
+      <div class="bonus-grid">
+        <button class="btn ${appSettings.sound ? "btn-primary" : ""}" onclick="updateSetting('sound', !appSettings.sound)">Sound ${appSettings.sound ? "On" : "Off"}</button>
+        <button class="btn ${appSettings.reduceMotion ? "btn-primary" : ""}" onclick="updateSetting('reduceMotion', !appSettings.reduceMotion)">Reduce Motion</button>
+        <button class="btn" onclick="updateSetting('textScale', Math.max(.9, (appSettings.textScale || 1) - .1))">Text -</button>
+        <button class="btn" onclick="updateSetting('textScale', Math.min(1.3, (appSettings.textScale || 1) + .1))">Text +</button>
+      </div>
+    </div>
+    <div class="page-card" style="margin-bottom:14px">
+      <div class="sum-section-title">Save Management</div>
+      <div class="bonus-grid">
+        <button class="btn" onclick="resetOnly('history')">Reset History</button>
+        <button class="btn" onclick="resetOnly('missions')">Reset Missions</button>
+        <button class="btn" onclick="resetOnly('shards')">Reset Shards</button>
+        <button class="btn" onclick="resetOnly('pity')">Reset Pity</button>
+      </div>
+    </div>
+    <div class="page-card" style="margin-bottom:14px">
+      <div class="sum-section-title">Tutorial</div>
+      <div class="online-note">1. Pick a banner. 2. Try a ritual. 3. Pull. 4. Open Codex. 5. Claim a mission.</div>
+      <button class="btn btn-primary" onclick="completeTutorial()" ${tutorialComplete ? "disabled" : ""}>${tutorialComplete ? "Completed" : "Complete Tutorial (+3 pulls)"}</button>
+    </div>
+    <div class="page-card" style="margin-bottom:14px">
       <div class="sum-section-title">Leaderboards</div>
       <div class="progress-list">${localLeaderboardRows().map(row => `<div class="forge-recipe"><div><div class="forge-recipe-title">#${row.rank} ${row.name}</div><div class="forge-recipe-sub">${row.stat}</div></div></div>`).join("")}</div>
     </div>
     <div class="page-card" style="margin-bottom:14px">
       <div class="sum-section-title">Friends</div>
-      <div class="btn-row"><input class="online-input" id="friend-code" placeholder="Friend code"><button class="btn btn-add" onclick="addFriendCode()">Add</button></div>
+      <div style="display:grid;grid-template-columns:1fr;gap:8px"><input class="online-input" id="friend-code" placeholder="Friend code"><button class="btn btn-add" onclick="addFriendCode()">Add Friend</button></div>
       <div class="progress-sub">${friendCodes.length ? friendCodes.join(" · ") : "No friends yet. Future account codes will live here."}</div>
     </div>
     <div class="page-card" style="margin-bottom:14px">
