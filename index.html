@@ -965,6 +965,9 @@ h1 {
 .search-wrap { padding: 10px 18px 0; }
 .search-wrap input { width: 100%; padding: 11px 13px; border: 1px solid var(--border2); border-radius: 10px; background: var(--panel); color: var(--text-hi); font: .86rem "Cinzel", serif; letter-spacing: .08em; }
 .event-hero { padding: 16px; border: 1px solid var(--border2); border-radius: 14px; background: radial-gradient(ellipse at 80% 20%, rgba(201,168,76,.14), transparent 60%), var(--panel); }
+.online-note { color: #8f887a; font: italic .95rem "Cormorant Garamond", serif; line-height: 1.45; }
+.online-textarea { width: 100%; min-height: 130px; padding: 10px; border: 1px solid var(--border2); border-radius: 10px; background: var(--panel); color: var(--text-hi); font: .78rem monospace; }
+.online-input { width: 100%; padding: 10px 12px; border: 1px solid var(--border2); border-radius: 10px; background: var(--panel); color: var(--text-hi); font: .86rem "Cinzel", serif; }
 .event-title { color: var(--gold); font: 700 1.1rem "Cinzel Decorative", cursive; letter-spacing: .1em; }
 .event-currency { color: var(--text-hi); font-size: 1.15rem; margin-top: 8px; }
 body.theme-aetheris::before { filter: none; }
@@ -1240,8 +1243,8 @@ body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%
   box-shadow: 0 10px 40px rgba(0,0,0,.45);
 }
 .nav-btn {
-  width: 54px;
-  height: 54px;
+  width: 50px;
+  height: 50px;
   border: 1px solid var(--border2);
   border-radius: 50%;
   background: var(--panel);
@@ -1251,7 +1254,7 @@ body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%
   align-items: center;
   justify-content: center;
   gap: 2px;
-  font: .55rem "Cinzel", serif;
+  font: .5rem "Cinzel", serif;
   letter-spacing: .04em;
   cursor: pointer;
 }
@@ -1261,7 +1264,7 @@ body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%
 .mission-subnav .btn { padding: 11px 8px; font-size: .76rem; }
 @media (max-width: 380px) {
   .bottom-nav { gap: 6px; padding: 8px; }
-  .nav-btn { width: 48px; height: 48px; font-size: .48rem; }
+  .nav-btn { width: 44px; height: 44px; font-size: .44rem; }
 }
 
 /* Readability pass: favor legibility over density on mobile. */
@@ -1504,12 +1507,19 @@ body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%
   </div>
 </section>
 
+<section class="app-page page-shell" id="page-online" data-page="online">
+  <div class="page-title">Online Hub</div>
+  <div class="page-subtitle">Local prototypes for future server features</div>
+  <div id="page-online-body"></div>
+</section>
+
 <nav class="bottom-nav" aria-label="Main pages">
   <button class="nav-btn active" data-nav-page="banners" onclick="goToPage('banners')"><span>✦</span>Banner</button>
   <button class="nav-btn" data-nav-page="event" onclick="goToPage('event')"><span>◌</span>Event</button>
   <button class="nav-btn" data-nav-page="missions" onclick="goToPage('missions')"><span>◎</span>Tasks</button>
   <button class="nav-btn" data-nav-page="forge" onclick="goToPage('forge')"><span>⬡</span>Forge</button>
   <button class="nav-btn" data-nav-page="collection" onclick="goToPage('collection')"><span>▣</span>Codex</button>
+  <button class="nav-btn" data-nav-page="online" onclick="goToPage('online')"><span>☁</span>Hub</button>
 </nav>
 
 
@@ -1908,6 +1918,10 @@ let unlockedBackgrounds = { aetheris: true };
 let activeBackground = "aetheris";
 let periodStats = { dailyKey: "", weeklyKey: "", dailyPulls: 0, dailyRarePlus: 0, weeklyPulls: 0, weeklyNewItems: 0, weeklyLegendaryPlus: 0 };
 let collectionSearch = "";
+let playerProfile = { name: "Wandering Summoner", title: "Gate-Touched" };
+let friendCodes = [];
+let tradeOffers = [];
+let validationReceipts = [];
 let activeAppPage = "banners";
 let activeMissionPage = "daily";
 let totalPulls = 0;
@@ -2138,6 +2152,10 @@ function saveState() {
       unlockedBackgrounds,
       activeBackground,
       periodStats,
+      playerProfile,
+      friendCodes,
+      tradeOffers,
+      validationReceipts,
       totalPulls,
       totalCollected,
       activeBanner,
@@ -2179,6 +2197,10 @@ function loadState() {
     unlockedBackgrounds = state.unlockedBackgrounds || { aetheris: true };
     activeBackground = state.activeBackground || "aetheris";
     periodStats = state.periodStats || periodStats;
+    playerProfile = state.playerProfile || playerProfile;
+    friendCodes = state.friendCodes || [];
+    tradeOffers = state.tradeOffers || [];
+    validationReceipts = state.validationReceipts || [];
     ensurePeriodStats();
     applyBackground(activeBackground);
     if (state.pityByBanner) {
@@ -3644,6 +3666,10 @@ function doReset() {
   unlockedBackgrounds = { aetheris: true };
   applyBackground("aetheris");
   periodStats = { dailyKey: "", weeklyKey: "", dailyPulls: 0, dailyRarePlus: 0, weeklyPulls: 0, weeklyNewItems: 0, weeklyLegendaryPlus: 0 };
+  playerProfile = { name: "Wandering Summoner", title: "Gate-Touched" };
+  friendCodes = [];
+  tradeOffers = [];
+  validationReceipts = [];
   ensurePeriodStats();
   updateFilterButtons();
   Object.keys(collection).forEach(k => delete collection[k]);
@@ -4048,13 +4074,125 @@ function setNotice(msg) {
   $("exp-notice").textContent = msg;
 }
 
-const APP_PAGES = ["banners", "event", "missions", "forge", "collection"];
+const APP_PAGES = ["banners", "event", "missions", "forge", "collection", "online"];
+
+function localLeaderboardRows() {
+  const completionAvg = Math.round(BANNERS.reduce((sum, b) => sum + bannerCompletionPct(b.id), 0) / BANNERS.length);
+  return [
+    { name: playerProfile.name, stat: `${completionAvg}% completion`, rank: 1 },
+    { name: "Future Friend", stat: "cloud pending", rank: 2 },
+    { name: "Server Ghost", stat: "awaiting auth", rank: 3 },
+  ];
+}
+
+function exportCloudSave() {
+  saveState();
+  const target = $("online-save-data");
+  if (target) target.value = localStorage.getItem(SAVE_KEY) || "{}";
+}
+
+function importCloudSave() {
+  const raw = $("online-save-data")?.value || "";
+  try {
+    JSON.parse(raw);
+    localStorage.setItem(SAVE_KEY, raw);
+    loadState();
+    renderOnlineHub();
+  } catch (e) {
+    const target = $("online-save-data");
+    if (target) target.value = "Invalid save JSON.";
+  }
+}
+
+function updateProfile() {
+  const name = $("profile-name")?.value?.trim();
+  const title = $("profile-title")?.value?.trim();
+  if (name) playerProfile.name = name;
+  if (title) playerProfile.title = title;
+  saveState();
+  renderOnlineHub();
+}
+
+function addFriendCode() {
+  const code = $("friend-code")?.value?.trim();
+  if (!code) return;
+  friendCodes.push(code);
+  saveState();
+  renderOnlineHub();
+}
+
+function createTradeOffer() {
+  const offered = $("trade-offer")?.value?.trim();
+  const wanted = $("trade-want")?.value?.trim();
+  if (!offered || !wanted) return;
+  tradeOffers.unshift({ offered, wanted, createdAt: new Date().toLocaleString() });
+  tradeOffers = tradeOffers.slice(0, 5);
+  saveState();
+  renderOnlineHub();
+}
+
+function generateValidationReceipt() {
+  const payload = `${Date.now()}:${totalPulls}:${pulls}:${Object.keys(collection).length}:${duplicateCount()}`;
+  validationReceipts.unshift({ id: flavorHash(payload).toString(16).toUpperCase(), pulls: totalPulls, createdAt: new Date().toLocaleString() });
+  validationReceipts = validationReceipts.slice(0, 5);
+  saveState();
+  renderOnlineHub();
+}
+
+function renderOnlineHub() {
+  const body = $("page-online-body");
+  if (!body) return;
+  const globalProgress = Math.min(100, Math.round((eventCurrency + totalPulls + Object.keys(collection).length) / 25));
+  const liveBanners = BANNERS.map((banner, index) => ({ ...banner, status: index === activeBanner ? "Active now" : index === (activeBanner + 1) % BANNERS.length ? "Next rotation" : "Standby" }));
+  body.innerHTML = `
+    <div class="page-card" style="margin-bottom:14px">
+      <div class="sum-section-title">Cloud Saves</div>
+      <div class="online-note">Local prototype: export/import JSON now, replace with account-backed cloud storage later.</div>
+      <div class="btn-row" style="margin:10px 0"><button class="btn btn-primary" onclick="exportCloudSave()">Export</button><button class="btn" onclick="importCloudSave()">Import</button></div>
+      <textarea class="online-textarea" id="online-save-data" placeholder="Exported save JSON appears here…"></textarea>
+    </div>
+    <div class="page-card" style="margin-bottom:14px">
+      <div class="sum-section-title">Profile</div>
+      <input class="online-input" id="profile-name" value="${playerProfile.name}" placeholder="Name" style="margin-bottom:8px">
+      <input class="online-input" id="profile-title" value="${playerProfile.title}" placeholder="Title" style="margin-bottom:8px">
+      <button class="btn btn-primary" onclick="updateProfile()">Save Profile</button>
+      <div class="progress-sub">Showcase: ${playerProfile.name} · ${playerProfile.title} · ${luckRating().label}</div>
+    </div>
+    <div class="page-card" style="margin-bottom:14px">
+      <div class="sum-section-title">Leaderboards</div>
+      <div class="progress-list">${localLeaderboardRows().map(row => `<div class="forge-recipe"><div><div class="forge-recipe-title">#${row.rank} ${row.name}</div><div class="forge-recipe-sub">${row.stat}</div></div></div>`).join("")}</div>
+    </div>
+    <div class="page-card" style="margin-bottom:14px">
+      <div class="sum-section-title">Friends</div>
+      <div class="btn-row"><input class="online-input" id="friend-code" placeholder="Friend code"><button class="btn btn-add" onclick="addFriendCode()">Add</button></div>
+      <div class="progress-sub">${friendCodes.length ? friendCodes.join(" · ") : "No friends yet. Future account codes will live here."}</div>
+    </div>
+    <div class="page-card" style="margin-bottom:14px">
+      <div class="sum-section-title">Trading Drafts</div>
+      <input class="online-input" id="trade-offer" placeholder="Offering…" style="margin-bottom:8px"><input class="online-input" id="trade-want" placeholder="Wanted…" style="margin-bottom:8px"><button class="btn btn-primary" onclick="createTradeOffer()">Draft Trade</button>
+      <div class="progress-list" style="margin-top:10px">${tradeOffers.map(t => `<div class="forge-recipe"><div><div class="forge-recipe-title">${t.offered} → ${t.wanted}</div><div class="forge-recipe-sub">${t.createdAt}</div></div></div>`).join("") || `<div class="online-note">Trading needs real auth/server validation before it can become live.</div>`}</div>
+    </div>
+    <div class="page-card" style="margin-bottom:14px">
+      <div class="sum-section-title">Server Validation Receipts</div>
+      <button class="btn btn-primary" onclick="generateValidationReceipt()">Generate Local Receipt</button>
+      <div class="progress-list" style="margin-top:10px">${validationReceipts.map(r => `<div class="forge-recipe"><div><div class="forge-recipe-title">Receipt ${r.id}</div><div class="forge-recipe-sub">${r.pulls} pulls · ${r.createdAt}</div></div></div>`).join("") || `<div class="online-note">Future server would sign pulls before rewards are accepted.</div>`}</div>
+    </div>
+    <div class="page-card" style="margin-bottom:14px">
+      <div class="sum-section-title">Global Event</div>
+      <div class="progress-title">Community Goal: Wake the Gate</div><div class="progress-sub">Local contribution mock · ${globalProgress}%</div><div class="progress-bar"><div class="progress-fill" style="width:${globalProgress}%"></div></div>
+    </div>
+    <div class="page-card">
+      <div class="sum-section-title">Live Banner Schedule</div>
+      <div class="progress-list">${liveBanners.map(b => `<div class="forge-recipe"><div><div class="forge-recipe-title">${b.name}</div><div class="forge-recipe-sub">${b.status} · server schedule placeholder</div></div></div>`).join("")}</div>
+    </div>`;
+}
 
 function renderActivePage() {
   if (activeAppPage === "event") renderEvent();
   else if (activeAppPage === "missions") renderMissionsPage();
   else if (activeAppPage === "forge") renderForgePage();
   else if (activeAppPage === "collection") renderCollectionPage();
+  else if (activeAppPage === "online") renderOnlineHub();
 }
 
 function goToPage(page) {
