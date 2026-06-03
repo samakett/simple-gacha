@@ -649,27 +649,27 @@ h1 {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: 86px;
   z-index: 11;
   display: flex;
   flex-direction: column;
-  max-height: 92vh;
+  max-height: calc(92vh - 86px);
   overflow: hidden;
   border-top: 1px solid var(--border2);
   border-radius: 20px 20px 0 0;
   background: #0a0a14;
   box-shadow: 0 -20px 60px rgba(0,0,0,.6);
-  transform: translateY(100%);
+  transform: translateY(calc(100% + 86px));
   transition: transform .4s cubic-bezier(.32,0,.15,1);
 }
-.sum-panel { z-index: 13; max-height: 88vh; background: #09090f; }
-.info-panel { z-index: 15; max-height: 90vh; background: #09090f; }
-.detail-panel { z-index: 23; max-height: 84vh; background: #09090f; }
-.forge-panel { z-index: 25; max-height: 86vh; background: #09090f; }
-.progress-panel { z-index: 27; max-height: 90vh; background: #09090f; }
-.event-panel { z-index: 29; max-height: 90vh; background: #09090f; }
-.shop-panel { z-index: 31; max-height: 88vh; background: #09090f; }
-.exp-panel { z-index: 21; max-height: 92vh; background: #09090f; }
+.sum-panel { z-index: 13; max-height: calc(88vh - 86px); background: #09090f; }
+.info-panel { z-index: 15; max-height: calc(90vh - 86px); background: #09090f; }
+.detail-panel { z-index: 23; max-height: calc(84vh - 86px); background: #09090f; }
+.forge-panel { z-index: 25; max-height: calc(86vh - 86px); background: #09090f; }
+.progress-panel { z-index: 27; max-height: calc(90vh - 86px); background: #09090f; }
+.event-panel { z-index: 29; max-height: calc(90vh - 86px); background: #09090f; }
+.shop-panel { z-index: 31; max-height: calc(88vh - 86px); background: #09090f; }
+.exp-panel { z-index: 21; max-height: calc(92vh - 86px); background: #09090f; }
 .inv-panel.open, .sum-panel.open, .info-panel.open, .detail-panel.open, .forge-panel.open, .progress-panel.open, .event-panel.open, .shop-panel.open, .exp-panel.open { transform: translateY(0); }
 .inv-handle {
   flex-shrink: 0;
@@ -1247,7 +1247,7 @@ body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%
 }
 .nav-btn span { font-size: 1.15rem; line-height: 1; }
 .nav-btn.active { border-color: var(--active-banner); box-shadow: 0 0 18px rgba(201,168,76,.18); color: var(--gold); }
-.mission-subnav { display: flex; gap: 8px; margin-bottom: 14px; }
+.mission-subnav { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; }
 .mission-subnav .btn { padding: 11px 8px; font-size: .76rem; }
 @media (max-width: 380px) {
   .bottom-nav { gap: 6px; padding: 8px; }
@@ -1284,7 +1284,7 @@ body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%
 
 @media (min-aspect-ratio: 1/1) and (min-width: 600px) {
   body { min-height: 100vh; padding: 0; overflow-y: auto; justify-content: flex-start; -webkit-overflow-scrolling: touch; }
-  .wrap {
+  .wrap.active {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto 1fr;
@@ -1452,6 +1452,10 @@ body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%
     <button class="btn" id="mission-tab-daily" onclick="switchMissionPage('daily')">Daily</button>
     <button class="btn" id="mission-tab-weekly" onclick="switchMissionPage('weekly')">Weekly</button>
     <button class="btn" id="mission-tab-lifetime" onclick="switchMissionPage('lifetime')">Lifetime</button>
+    <button class="btn" id="mission-tab-mastery" onclick="switchMissionPage('mastery')">Mastery</button>
+    <button class="btn" id="mission-tab-dupes" onclick="switchMissionPage('dupes')">Dupes</button>
+    <button class="btn" id="mission-tab-titles" onclick="switchMissionPage('titles')">Titles</button>
+    <button class="btn" id="mission-tab-codex" onclick="switchMissionPage('codex')">Awards</button>
   </div>
   <div id="page-missions-body" class="page-card"></div>
 </section>
@@ -1648,6 +1652,25 @@ const WEEKLY_MISSIONS = [
   { id: "weekly-legend", title: "Golden Noise", description: "Pull 2 Legendary-or-better items this week.", target: 2, metric: () => periodStats.weeklyLegendaryPlus, reward: { pulls: 10, shards: { legendary: 1 } } },
 ];
 const ACHIEVEMENT_THRESHOLDS = [25, 50, 75, 100];
+const DUPLICATE_MILESTONES = [
+  { id: "dupes-5", target: 5, title: "Echo Collector", reward: { pulls: 3 } },
+  { id: "dupes-20", target: 20, title: "Shard Whisperer", reward: { pulls: 5, shards: { epic: 2 } } },
+  { id: "dupes-50", target: 50, title: "Again, With Feeling", reward: { pulls: 10, shards: { legendary: 1 } } },
+  { id: "dupes-100", target: 100, title: "The Duplicate Duke", reward: { pulls: 20, shards: { mythic: 1 } } },
+];
+const TITLE_AWARDS = [
+  { id: "title-archivist", title: "Archivist of Oddities", description: "Discover 25 unique items.", metric: () => Object.keys(collection).length, target: 25, reward: { pulls: 5 } },
+  { id: "title-gearheart", title: "Gearhearted", description: "Reach 25% Clockwork completion.", metric: () => bannerCompletionPct("clockwork"), target: 25, reward: { shards: { epic: 2 } } },
+  { id: "title-deepspeaker", title: "Deepspeaker", description: "Reach 25% Sunken completion.", metric: () => bannerCompletionPct("sunken"), target: 25, reward: { shards: { rare: 15 } } },
+  { id: "title-lucky", title: "Statistically Suspicious", description: "Own 3 Legendary-or-better items.", metric: () => ownedAtLeast("legendary"), target: 3, reward: { pulls: 8 } },
+];
+const CODEX_AWARDS = [
+  { id: "codex-common", rarity: "common", title: "Common Census", reward: { pulls: 5 } },
+  { id: "codex-rare", rarity: "rare", title: "Rare Register", reward: { shards: { epic: 3 } } },
+  { id: "codex-epic", rarity: "epic", title: "Epic Appendix", reward: { pulls: 10, shards: { legendary: 1 } } },
+  { id: "codex-legendary", rarity: "legendary", title: "Legend Ledger", reward: { pulls: 20 } },
+  { id: "codex-mythic", rarity: "mythic", title: "Mythic Marginalia", reward: { shards: { mythic: 2 } } },
+];
 const EVENT_DURATION_DAYS = 40;
 const EVENT_REWARDS = [
   { id: "event-pulls", title: "Festival Pull Bundle", cost: 80, reward: { pulls: 5 } },
@@ -1838,6 +1861,9 @@ let claimedMissions = {};
 let claimedDailyMissions = {};
 let claimedWeeklyMissions = {};
 let claimedAchievements = {};
+let claimedDuplicateMilestones = {};
+let claimedTitles = {};
+let claimedCodexAwards = {};
 let eventCurrency = 0;
 let eventStartedAt = Date.now();
 let claimedEventRewards = {};
@@ -2062,6 +2088,9 @@ function saveState() {
       claimedDailyMissions,
       claimedWeeklyMissions,
       claimedAchievements,
+      claimedDuplicateMilestones,
+      claimedTitles,
+      claimedCodexAwards,
       eventCurrency,
       eventStartedAt,
       claimedEventRewards,
@@ -2096,6 +2125,9 @@ function loadState() {
     claimedDailyMissions = state.claimedDailyMissions || {};
     claimedWeeklyMissions = state.claimedWeeklyMissions || {};
     claimedAchievements = state.claimedAchievements || {};
+    claimedDuplicateMilestones = state.claimedDuplicateMilestones || {};
+    claimedTitles = state.claimedTitles || {};
+    claimedCodexAwards = state.claimedCodexAwards || {};
     eventCurrency = state.eventCurrency ?? 0;
     eventStartedAt = state.eventStartedAt ?? Date.now();
     claimedEventRewards = state.claimedEventRewards || {};
@@ -2746,21 +2778,67 @@ function renderMissionsPage() {
   const body = $("page-missions-body");
   if (!body) return;
   ensurePeriodStats();
-  ["daily", "weekly", "lifetime"].forEach(page => {
+  ["daily", "weekly", "lifetime", "mastery", "dupes", "titles", "codex"].forEach(page => {
     const tab = $(`mission-tab-${page}`);
     if (tab) tab.classList.toggle("btn-primary", page === activeMissionPage);
   });
   if (activeMissionPage === "daily") body.innerHTML = renderMissionGroup("Daily Missions", `resets in ${timeUntilNextDay()}`, DAILY_MISSIONS, claimedDailyMissions, "claimDailyMission");
   else if (activeMissionPage === "weekly") body.innerHTML = renderMissionGroup("Weekly Missions", `resets in ${timeUntilNextWeek()}`, WEEKLY_MISSIONS, claimedWeeklyMissions, "claimWeeklyMission");
-  else body.innerHTML = `
-    ${renderMissionGroup("Lifetime Missions", "always available", MISSIONS, claimedMissions, "claimMission")}
-    <div class="sum-section-title">Banner Mastery</div>
-    <div class="progress-list">
-      ${BANNERS.map(banner => {
-        const pct = bannerCompletionPct(banner.id);
-        return `<div class="progress-card"><div class="progress-title">${banner.name}</div><div class="progress-sub">${bannerDiscoveredCount(banner.id)} / ${bannerCatalogCount(banner.id)} discovered · ${pct}% complete</div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div><div class="forge-recipes" style="margin-top:10px">${ACHIEVEMENT_THRESHOLDS.map(threshold => { const key = achievementKey(banner.id, threshold); const canClaim = pct >= threshold && !claimedAchievements[key]; return `<div class="forge-recipe"><div><div class="forge-recipe-title">${threshold}% Mastery</div><div class="forge-recipe-sub">Reward: ${rewardText(achievementReward(threshold))}</div></div><button class="btn btn-add" onclick="claimAchievement('${banner.id}', ${threshold})" ${canClaim ? "" : "disabled"}>${claimedAchievements[key] ? "Claimed" : "Claim"}</button></div>`; }).join("")}</div></div>`;
-      }).join("")}
-    </div>`;
+  else if (activeMissionPage === "lifetime") body.innerHTML = renderMissionGroup("Lifetime Missions", "always available", MISSIONS, claimedMissions, "claimMission");
+  else if (activeMissionPage === "mastery") body.innerHTML = renderMasteryPage();
+  else if (activeMissionPage === "dupes") body.innerHTML = renderDuplicateMilestones();
+  else if (activeMissionPage === "titles") body.innerHTML = renderTitlesPage();
+  else body.innerHTML = renderCodexAwardsPage();
+}
+
+function renderMasteryPage() {
+  return `<div class="sum-section-title">Banner Mastery</div><div class="progress-list">${BANNERS.map(banner => { const pct = bannerCompletionPct(banner.id); return `<div class="progress-card"><div class="progress-title">${banner.name}</div><div class="progress-sub">${bannerDiscoveredCount(banner.id)} / ${bannerCatalogCount(banner.id)} discovered · ${pct}% complete</div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div><div class="forge-recipes" style="margin-top:10px">${ACHIEVEMENT_THRESHOLDS.map(threshold => { const key = achievementKey(banner.id, threshold); const canClaim = pct >= threshold && !claimedAchievements[key]; return `<div class="forge-recipe"><div><div class="forge-recipe-title">${threshold}% Mastery</div><div class="forge-recipe-sub">Reward: ${rewardText(achievementReward(threshold))}</div></div><button class="btn btn-add" onclick="claimAchievement('${banner.id}', ${threshold})" ${canClaim ? "" : "disabled"}>${claimedAchievements[key] ? "Claimed" : "Claim"}</button></div>`; }).join("")}</div></div>`; }).join("")}</div>`;
+}
+
+function claimDuplicateMilestone(id) {
+  const milestone = DUPLICATE_MILESTONES.find(m => m.id === id);
+  if (!milestone || claimedDuplicateMilestones[id] || duplicateCount() < milestone.target) return;
+  claimedDuplicateMilestones[id] = true;
+  applyReward(milestone.reward);
+  renderMissionsPage();
+  saveState();
+}
+
+function renderDuplicateMilestones() {
+  const total = duplicateCount();
+  return `<div class="sum-section-title">Duplicate Milestones</div><div class="progress-list">${DUPLICATE_MILESTONES.map(m => { const done = total >= m.target; return `<div class="progress-card"><div class="progress-row"><div><div class="progress-title">${m.title}</div><div class="progress-sub">Pull ${m.target} duplicates · Reward: ${rewardText(m.reward)}</div></div><button class="btn btn-add" onclick="claimDuplicateMilestone('${m.id}')" ${done && !claimedDuplicateMilestones[m.id] ? "" : "disabled"}>${claimedDuplicateMilestones[m.id] ? "Claimed" : "Claim"}</button></div><div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,total/m.target*100)}%"></div></div><div class="progress-sub">${Math.min(total,m.target)} / ${m.target}</div></div>`; }).join("")}</div>`;
+}
+
+function claimTitleAward(id) {
+  const award = TITLE_AWARDS.find(t => t.id === id);
+  if (!award || claimedTitles[id] || award.metric() < award.target) return;
+  claimedTitles[id] = true;
+  applyReward(award.reward);
+  renderMissionsPage();
+  saveState();
+}
+
+function renderTitlesPage() {
+  return `<div class="sum-section-title">Titles</div><div class="progress-list">${TITLE_AWARDS.map(t => { const progress = Math.min(t.metric(), t.target); const done = progress >= t.target; return `<div class="progress-card"><div class="progress-row"><div><div class="progress-title">${t.title}</div><div class="progress-sub">${t.description} · Reward: ${rewardText(t.reward)}</div></div><button class="btn btn-add" onclick="claimTitleAward('${t.id}')" ${done && !claimedTitles[t.id] ? "" : "disabled"}>${claimedTitles[t.id] ? "Claimed" : "Claim"}</button></div><div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,progress/t.target*100)}%"></div></div><div class="progress-sub">${progress} / ${t.target}</div></div>`; }).join("")}</div>`;
+}
+
+function codexAwardProgress(rarity) {
+  const items = CATALOG_ITEMS.filter(item => item.rarity === rarity);
+  const owned = items.filter(item => collection[item.name]).length;
+  return { owned, total: items.length, complete: items.length > 0 && owned === items.length };
+}
+
+function claimCodexAward(id) {
+  const award = CODEX_AWARDS.find(a => a.id === id);
+  if (!award || claimedCodexAwards[id] || !codexAwardProgress(award.rarity).complete) return;
+  claimedCodexAwards[id] = true;
+  applyReward(award.reward);
+  renderMissionsPage();
+  saveState();
+}
+
+function renderCodexAwardsPage() {
+  return `<div class="sum-section-title">Codex Completion Awards</div><div class="progress-list">${CODEX_AWARDS.map(a => { const p = codexAwardProgress(a.rarity); return `<div class="progress-card"><div class="progress-row"><div><div class="progress-title ${rarityClass(a.rarity)}">${a.title}</div><div class="progress-sub">Complete all ${rarityLabel(a.rarity)} items · Reward: ${rewardText(a.reward)}</div></div><button class="btn btn-add" onclick="claimCodexAward('${a.id}')" ${p.complete && !claimedCodexAwards[a.id] ? "" : "disabled"}>${claimedCodexAwards[a.id] ? "Claimed" : "Claim"}</button></div><div class="progress-bar"><div class="progress-fill" style="width:${p.total ? p.owned/p.total*100 : 0}%"></div></div><div class="progress-sub">${p.owned} / ${p.total}</div></div>`; }).join("")}</div>`;
 }
 
 function openProgress() {
@@ -3403,6 +3481,9 @@ function doReset() {
   claimedDailyMissions = {};
   claimedWeeklyMissions = {};
   claimedAchievements = {};
+  claimedDuplicateMilestones = {};
+  claimedTitles = {};
+  claimedCodexAwards = {};
   eventCurrency = 0;
   eventStartedAt = Date.now();
   claimedEventRewards = {};
@@ -3862,7 +3943,7 @@ function initMissionSwipe() {
     const dx = touch.clientX - startX;
     const dy = touch.clientY - startY;
     if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy) * 1.25) return;
-    const pages = ["daily", "weekly", "lifetime"];
+    const pages = ["daily", "weekly", "lifetime", "mastery", "dupes", "titles", "codex"];
     const idx = pages.indexOf(activeMissionPage);
     const next = Math.max(0, Math.min(pages.length - 1, idx + (dx < 0 ? 1 : -1)));
     switchMissionPage(pages[next]);
