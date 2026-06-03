@@ -952,6 +952,16 @@ h1 {
 .progress-fill { height: 100%; border-radius: 999px; background: var(--active-banner); transition: width .4s ease; }
 .progress-list { display: flex; flex-direction: column; gap: 10px; }
 .bonus-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.recap-overlay { position: fixed; inset: 0; z-index: 58; background: rgba(0,0,0,.76); backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity .25s ease; display: flex; align-items: flex-end; }
+.recap-overlay.open { opacity: 1; pointer-events: all; }
+.recap-card { width: 100%; max-height: calc(86vh - 86px); overflow-y: auto; border-top: 1px solid var(--border2); border-radius: 22px 22px 0 0; background: #09090f; padding: 20px 18px calc(110px + env(safe-area-inset-bottom)); box-shadow: 0 -20px 60px rgba(0,0,0,.7); }
+.recap-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; margin: 12px 0; }
+.recap-mini { aspect-ratio: 2/3; border: 1px solid var(--border2); border-radius: 9px; background: var(--panel); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: .62rem; text-align: center; }
+.ritual-panel { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 8px; }
+.ritual-card { padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel); cursor: pointer; }
+.ritual-card.active { border-color: var(--active-banner); background: rgba(201,168,76,.08); }
+.ritual-title { color: var(--text-hi); font-size: .72rem; letter-spacing: .08em; }
+.ritual-sub { margin-top: 4px; color: #777; font: italic .72rem "Cormorant Garamond", serif; }
 .search-wrap { padding: 10px 18px 0; }
 .search-wrap input { width: 100%; padding: 11px 13px; border: 1px solid var(--border2); border-radius: 10px; background: var(--panel); color: var(--text-hi); font: .86rem "Cinzel", serif; letter-spacing: .08em; }
 .event-hero { padding: 16px; border: 1px solid var(--border2); border-radius: 14px; background: radial-gradient(ellipse at 80% 20%, rgba(201,168,76,.14), transparent 60%), var(--panel); }
@@ -1401,6 +1411,7 @@ body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%
     </div>
 
     <div class="actions">
+      <div class="ritual-panel" id="ritual-panel"></div>
       <div class="btn-row">
         <button class="btn btn-primary" id="btn-one" onclick="doPull(1)">
           ✦ Summon ×1
@@ -1408,7 +1419,7 @@ body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%
         </button>
         <button class="btn btn-ten" id="btn-ten" onclick="doPull(10)">
           ✦ Summon ×10
-          <span class="cost">10 pulls</span>
+          <span class="cost" id="cost-ten">10 pulls</span>
         </button>
       </div>
       <button class="btn btn-info" onclick="openBannerInfo()">ⓘ Banner Details</button>
@@ -1456,6 +1467,8 @@ body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%
     <button class="btn" id="mission-tab-dupes" onclick="switchMissionPage('dupes')">Dupes</button>
     <button class="btn" id="mission-tab-titles" onclick="switchMissionPage('titles')">Titles</button>
     <button class="btn" id="mission-tab-codex" onclick="switchMissionPage('codex')">Awards</button>
+    <button class="btn" id="mission-tab-sets" onclick="switchMissionPage('sets')">Sets</button>
+    <button class="btn" id="mission-tab-companions" onclick="switchMissionPage('companions')">Familiars</button>
   </div>
   <div id="page-missions-body" class="page-card"></div>
 </section>
@@ -1505,6 +1518,7 @@ body.theme-verdant::before { background-image: radial-gradient(ellipse at 50% 0%
 <canvas id="leg-canvas"></canvas>
 <div class="leg-tap-prompt" id="leg-tap-prompt">tap to continue</div>
 <div class="pull-view-overlay" id="pull-view-overlay" onclick="closePullViewer()"></div>
+<div class="recap-overlay" id="recap-overlay" onclick="closePullRecap()"></div>
 
 <div class="inv-overlay" id="inv-overlay" onclick="closeInv()"></div>
 <div class="inv-panel" id="inv-panel">
@@ -1670,6 +1684,24 @@ const CODEX_AWARDS = [
   { id: "codex-epic", rarity: "epic", title: "Epic Appendix", reward: { pulls: 10, shards: { legendary: 1 } } },
   { id: "codex-legendary", rarity: "legendary", title: "Legend Ledger", reward: { pulls: 20 } },
   { id: "codex-mythic", rarity: "mythic", title: "Mythic Marginalia", reward: { shards: { mythic: 2 } } },
+];
+const RITUALS = [
+  { id: "none", title: "Plain Summon", desc: "Normal 10-pull", cost: 10 },
+  { id: "epic", title: "Violet Omen", desc: "+Epic odds, costs 12", cost: 12 },
+  { id: "new", title: "Seeker's Vow", desc: "Upgrade one duplicate to new Rare+, costs 15", cost: 15 },
+  { id: "shards", title: "Echo Harvest", desc: "Double duplicate shards, costs 10", cost: 10 },
+];
+const COLLECTION_SETS = [
+  { id: "aetheris-court", title: "Aetheris Court", items: ["Aetheris Crown", "Celestial Codex", "The Pale Throne", "Eye of Eternity"], reward: { pulls: 10 } },
+  { id: "drowned-regalia", title: "Drowned Regalia", items: ["The Drowned God", "Crown of Coral", "The Salt Throne", "Leviathan's Eye"], reward: { shards: { legendary: 2 } } },
+  { id: "dominion-mechanica", title: "Dominion Mechanica", items: ["Chronos Engine", "Brass Seraph", "The Hourless King", "The Last Second"], reward: { pulls: 15 } },
+  { id: "little-trouble", title: "Little Trouble Kit", items: ["Flint Dagger", "Copper Ring", "Tattered Cloak", "Wooden Staff"], reward: { shards: { rare: 10 } } },
+];
+const COMPANIONS = [
+  { id: "mote", name: "Mote the Shardmoth", unlock: "dupes", bonus: "Duplicate shards +1", desc: "A tiny accountant with wings and opinions." },
+  { id: "tick", name: "Tick-Tock Toad", unlock: "clockwork", bonus: "+1 event sigil per 10-pull", desc: "Ribbits exactly on the beat." },
+  { id: "brine", name: "Brinekit", unlock: "sunken", bonus: "+1 Rare shard on Rare+ duplicates", desc: "Wet, smug, and probably correct." },
+  { id: "glimmer", name: "Glimmerpup", unlock: "starter", bonus: "+1 pull from daily first summon", desc: "A good dog made mostly of optimism." },
 ];
 const EVENT_DURATION_DAYS = 40;
 const EVENT_REWARDS = [
@@ -1864,6 +1896,10 @@ let claimedAchievements = {};
 let claimedDuplicateMilestones = {};
 let claimedTitles = {};
 let claimedCodexAwards = {};
+let claimedItemSets = {};
+let unlockedCompanions = { glimmer: true };
+let equippedCompanion = "glimmer";
+let activeRitual = "none";
 let eventCurrency = 0;
 let eventStartedAt = Date.now();
 let claimedEventRewards = {};
@@ -2091,6 +2127,10 @@ function saveState() {
       claimedDuplicateMilestones,
       claimedTitles,
       claimedCodexAwards,
+      claimedItemSets,
+      unlockedCompanions,
+      equippedCompanion,
+      activeRitual,
       eventCurrency,
       eventStartedAt,
       claimedEventRewards,
@@ -2128,6 +2168,10 @@ function loadState() {
     claimedDuplicateMilestones = state.claimedDuplicateMilestones || {};
     claimedTitles = state.claimedTitles || {};
     claimedCodexAwards = state.claimedCodexAwards || {};
+    claimedItemSets = state.claimedItemSets || {};
+    unlockedCompanions = state.unlockedCompanions || { glimmer: true };
+    equippedCompanion = state.equippedCompanion || "glimmer";
+    activeRitual = state.activeRitual || "none";
     eventCurrency = state.eventCurrency ?? 0;
     eventStartedAt = state.eventStartedAt ?? Date.now();
     claimedEventRewards = state.claimedEventRewards || {};
@@ -2171,6 +2215,9 @@ function collectItem(rarity, item) {
     collection[key].count++;
     if (!collection[key].banner) collection[key].banner = banner;
     shardsAwarded = SHARD_VALUES[rarity] || 0;
+    if (activeRitual === "shards") shardsAwarded *= 2;
+    if (equippedCompanion === "mote") shardsAwarded += 1;
+    if (equippedCompanion === "brine" && RARITY_ORDER[rarity] >= RARITY_ORDER.rare) shardBalances.rare += 1;
     shardBalances[rarity] += shardsAwarded;
   } else {
     collection[key] = { icon: item.icon, rarity, banner, count: 1, discoveredAt: totalPulls };
@@ -2636,7 +2683,7 @@ function effectiveRatesForActiveBanner() {
   rates.epic += bonus.epic;
   rates.legendary += bonus.legendary;
   rates.common = Math.max(0, 1 - rates.mythic - rates.legendary - rates.epic - rates.rare);
-  return rates;
+  return ritualRates(rates);
 }
 
 function dayKey(date = new Date()) {
@@ -2788,7 +2835,9 @@ function renderMissionsPage() {
   else if (activeMissionPage === "mastery") body.innerHTML = renderMasteryPage();
   else if (activeMissionPage === "dupes") body.innerHTML = renderDuplicateMilestones();
   else if (activeMissionPage === "titles") body.innerHTML = renderTitlesPage();
-  else body.innerHTML = renderCodexAwardsPage();
+  else if (activeMissionPage === "codex") body.innerHTML = renderCodexAwardsPage();
+  else if (activeMissionPage === "sets") body.innerHTML = renderItemSetsPage();
+  else body.innerHTML = renderCompanionsPage();
 }
 
 function renderMasteryPage() {
@@ -2839,6 +2888,59 @@ function claimCodexAward(id) {
 
 function renderCodexAwardsPage() {
   return `<div class="sum-section-title">Codex Completion Awards</div><div class="progress-list">${CODEX_AWARDS.map(a => { const p = codexAwardProgress(a.rarity); return `<div class="progress-card"><div class="progress-row"><div><div class="progress-title ${rarityClass(a.rarity)}">${a.title}</div><div class="progress-sub">Complete all ${rarityLabel(a.rarity)} items · Reward: ${rewardText(a.reward)}</div></div><button class="btn btn-add" onclick="claimCodexAward('${a.id}')" ${p.complete && !claimedCodexAwards[a.id] ? "" : "disabled"}>${claimedCodexAwards[a.id] ? "Claimed" : "Claim"}</button></div><div class="progress-bar"><div class="progress-fill" style="width:${p.total ? p.owned/p.total*100 : 0}%"></div></div><div class="progress-sub">${p.owned} / ${p.total}</div></div>`; }).join("")}</div>`;
+}
+
+function itemSetProgress(set) {
+  const owned = set.items.filter(name => collection[name]).length;
+  return { owned, total: set.items.length, complete: owned === set.items.length };
+}
+
+function claimItemSet(id) {
+  const set = COLLECTION_SETS.find(s => s.id === id);
+  if (!set || claimedItemSets[id] || !itemSetProgress(set).complete) return;
+  claimedItemSets[id] = true;
+  applyReward(set.reward);
+  renderMissionsPage();
+  saveState();
+}
+
+function renderItemSetsPage() {
+  return `<div class="sum-section-title">Item Sets</div><div class="progress-list">${COLLECTION_SETS.map(set => { const p = itemSetProgress(set); return `<div class="progress-card"><div class="progress-row"><div><div class="progress-title">${set.title}</div><div class="progress-sub">${set.items.join(" · ")} · Reward: ${rewardText(set.reward)}</div></div><button class="btn btn-add" onclick="claimItemSet('${set.id}')" ${p.complete && !claimedItemSets[set.id] ? "" : "disabled"}>${claimedItemSets[set.id] ? "Claimed" : "Claim"}</button></div><div class="progress-bar"><div class="progress-fill" style="width:${p.owned/p.total*100}%"></div></div><div class="progress-sub">${p.owned} / ${p.total}</div></div>`; }).join("")}</div>`;
+}
+
+function companionUnlocked(companion) {
+  if (unlockedCompanions[companion.id]) return true;
+  if (companion.unlock === "starter") return true;
+  if (companion.unlock === "dupes") return duplicateCount() >= 20;
+  if (companion.unlock === "clockwork") return bannerCompletionPct("clockwork") >= 25;
+  if (companion.unlock === "sunken") return bannerCompletionPct("sunken") >= 25;
+  return false;
+}
+
+function equipCompanion(id) {
+  const companion = COMPANIONS.find(c => c.id === id);
+  if (!companion || !companionUnlocked(companion)) return;
+  unlockedCompanions[id] = true;
+  equippedCompanion = id;
+  renderMissionsPage();
+  saveState();
+}
+
+function renderCompanionsPage() {
+  return `<div class="sum-section-title">Companions & Familiars</div><div class="progress-list">${COMPANIONS.map(c => { const unlocked = companionUnlocked(c); if (unlocked) unlockedCompanions[c.id] = true; return `<div class="progress-card"><div class="progress-row"><div><div class="progress-title">${c.name}</div><div class="progress-sub">${c.desc} · ${c.bonus}</div></div><button class="btn btn-add" onclick="equipCompanion('${c.id}')" ${unlocked ? "" : "disabled"}>${equippedCompanion === c.id ? "Equipped" : unlocked ? "Equip" : "Locked"}</button></div></div>`; }).join("")}</div>`;
+}
+
+function showPullRecap(results) {
+  const newItems = results.filter(r => r.isNew);
+  const shards = results.reduce((sum, r) => sum + (r.shardsAwarded || 0), 0);
+  const best = results.reduce((b, r) => RARITY_ORDER[r.rarity] > RARITY_ORDER[b.rarity] ? r : b, results[0]);
+  const overlay = $("recap-overlay");
+  overlay.innerHTML = `<div class="recap-card" onclick="event.stopPropagation()"><div class="sum-section-title">Pull Recap</div><div class="sum-best"><span class="sum-best-icon ${rarityClass(best.rarity)}">${best.item.icon}</span><div class="sum-best-info"><div class="sum-best-name">${best.item.name}</div><div class="sum-best-rarity ${rarityClass(best.rarity)}">Best Pull · ${rarityLabel(best.rarity)}</div><div class="sum-best-pull">${newItems.length} new · ${shards} shards · ${getActiveRitual().title}</div></div></div><div class="recap-grid">${results.map(r => `<div class="recap-mini ${rarityClass(r.rarity)}"><span style="font-size:1.4rem">${r.item.icon}</span><span>${r.isNew ? "NEW" : r.shardsAwarded ? `+${r.shardsAwarded}` : rarityLabel(r.rarity).slice(0,3)}</span></div>`).join("")}</div><button class="btn btn-primary" onclick="closePullRecap()">Continue</button></div>`;
+  overlay.classList.add("open");
+}
+
+function closePullRecap() {
+  $("recap-overlay").classList.remove("open");
 }
 
 function openProgress() {
@@ -3146,6 +3248,36 @@ function renderSummary() {
   }));
 }
 
+function getActiveRitual() {
+  return RITUALS.find(r => r.id === activeRitual) || RITUALS[0];
+}
+
+function selectRitual(id) {
+  activeRitual = id;
+  renderRitualPanel();
+  updateCurrency();
+  saveState();
+}
+
+function renderRitualPanel() {
+  const panel = $("ritual-panel");
+  if (!panel) return;
+  panel.innerHTML = RITUALS.map(ritual => `
+    <div class="ritual-card ${activeRitual === ritual.id ? "active" : ""}" onclick="selectRitual('${ritual.id}')">
+      <div class="ritual-title">${ritual.title}</div>
+      <div class="ritual-sub">${ritual.desc}</div>
+    </div>`).join("");
+}
+
+function ritualRates(baseRates) {
+  const rates = { ...baseRates };
+  if (activeRitual === "epic") {
+    rates.epic += .06;
+    rates.common = Math.max(0, 1 - rates.mythic - rates.legendary - rates.epic - rates.rare);
+  }
+  return rates;
+}
+
 function roll() {
   lastRollWasPity = false;
   const bannerId = getActiveBannerId();
@@ -3195,6 +3327,16 @@ function rollTenPullResults() {
     results[targetIdx].fromGuarantee = true;
   }
   results.forEach(result => { result.item = pickItem(result.rarity); });
+  if (activeRitual === "new" && !results.some(result => !collection[result.item.name])) {
+    const pool = getPoolForActiveBanner("rare").filter(item => !collection[item.name]);
+    if (pool.length) {
+      const idx = results.findIndex(result => RARITY_ORDER[result.rarity] < RARITY_ORDER.legendary);
+      const targetIdx = idx >= 0 ? idx : 0;
+      results[targetIdx].rarity = "rare";
+      results[targetIdx].item = pool[Math.floor(Math.random() * pool.length)];
+      results[targetIdx].fromRitual = true;
+    }
+  }
   return results;
 }
 
@@ -3247,7 +3389,7 @@ function revealSingle(card, front, rarity, item) {
   $("new-single").classList.toggle("visible", collectResult.isNew);
 
   if (rarity === "legendary" || rarity === "mythic") {
-    triggerLegendaryAnimation($("stage-single"), rarity, () => { singleFlipped = true; finishPull(); });
+    triggerLegendaryAnimation($("stage-single"), rarity, () => { singleFlipped = true; finishPull(); }, item.banner);
   } else {
     setTimeout(() => {
       SFX.flip(rarity);
@@ -3293,6 +3435,7 @@ function doTenPull() {
     $("mc-wrap-" + bestIdx).classList.add("best-card");
     showBanner(results[bestIdx].rarity, results[bestIdx].item);
     SFX.bestBanner(results[bestIdx].rarity);
+    showPullRecap(results);
     finishPull();
   });
 }
@@ -3318,15 +3461,18 @@ function runTenPullSequence(results, i, onAllDone) {
 }
 
 function doPull(n) {
-  if (pulling || pulls < n) return;
+  const cost = n === 10 ? getActiveRitual().cost : n;
+  if (pulling || pulls < cost) return;
   SFX.click();
   pulling = true;
-  pulls -= n;
+  pulls -= cost;
   totalPulls += n;
   ensurePeriodStats();
   periodStats.dailyPulls += n;
   periodStats.weeklyPulls += n;
   eventCurrency += n;
+  if (n === 10 && equippedCompanion === "tick") eventCurrency += 1;
+  if (n === 1 && equippedCompanion === "glimmer" && periodStats.dailyPulls === 1) pulls += 1;
   if (n === 1) {
     $("stage-multi").classList.remove("active");
     $("stage-single").style.display = "";
@@ -3426,7 +3572,10 @@ function updateCurrency() {
   updatePity();
   updateShardWallet();
   $("btn-one").disabled = pulling || pulls < 1;
-  $("btn-ten").disabled = pulling || pulls < 10;
+  const ritualCost = getActiveRitual().cost;
+  const costTen = $("cost-ten");
+  if (costTen) costTen.textContent = `${ritualCost} pull${ritualCost !== 1 ? "s" : ""}`;
+  $("btn-ten").disabled = pulling || pulls < ritualCost;
 }
 
 function updatePity() {
@@ -3484,6 +3633,10 @@ function doReset() {
   claimedDuplicateMilestones = {};
   claimedTitles = {};
   claimedCodexAwards = {};
+  claimedItemSets = {};
+  unlockedCompanions = { glimmer: true };
+  equippedCompanion = "glimmer";
+  activeRitual = "none";
   eventCurrency = 0;
   eventStartedAt = Date.now();
   claimedEventRewards = {};
@@ -3518,7 +3671,7 @@ function hideBanner() {
   $("best-banner").className = "best-banner";
 }
 
-function triggerLegendaryAnimation(cardEl, rarity, onComplete) {
+function triggerLegendaryAnimation(cardEl, rarity, onComplete, bannerId = getActiveBannerId()) {
   const flash = $("leg-flash");
   const dim = $("leg-dim");
   const canvas = $("leg-canvas");
@@ -3532,7 +3685,7 @@ function triggerLegendaryAnimation(cardEl, rarity, onComplete) {
     setTimeout(() => flash.classList.remove("on"), 180);
     dim.classList.add("on");
     canvas.classList.add("on");
-    launchParticles(ctx2d, canvas, rarity);
+    launchParticles(ctx2d, canvas, rarity, bannerId);
     cardEl.querySelector(".card-inner").classList.add("legendary-flip");
     setTimeout(() => {
       cardEl.querySelector(".card-inner").classList.add("flipped");
@@ -3608,7 +3761,7 @@ function triggerLegendaryTenPull(cardIdx, result, onDismiss) {
       flash.classList.add("on");
       setTimeout(() => flash.classList.remove("on"), 180);
       canvas.classList.add("on");
-      launchParticles(ctx2d, canvas, result.rarity);
+      launchParticles(ctx2d, canvas, result.rarity, result.item.banner);
       backFace.style.opacity = "0";
       frontFace.style.opacity = "1";
       setTimeout(() => SFX.reveal(result.rarity), 900);
@@ -3642,14 +3795,19 @@ function triggerLegendaryTenPull(cardIdx, result, onDismiss) {
   }, 500);
 }
 
-function launchParticles(ctx2d, canvas, rarity = "legendary") {
+function launchParticles(ctx2d, canvas, rarity = "legendary", bannerId = getActiveBannerId()) {
   const W = canvas.width;
   const H = canvas.height;
   const cx = W / 2;
   const cy = H * .55;
+  const bannerPalettes = {
+    aetheris: ["#f97316", "#fbbf24", "#fed7aa", "#fff7ed", "#c084fc", "#fde68a"],
+    sunken: ["#0f766e", "#2dd4bf", "#a7f3d0", "#e0f2fe", "#38bdf8", "#ccfbf1"],
+    clockwork: ["#8b5a2b", "#d6a35b", "#fde68a", "#fef3c7", "#c084fc", "#f59e0b"],
+  };
   const palette = rarity === "mythic"
-    ? ["#ef4444", "#fca5a5", "#fee2e2", "#f97316", "#c084fc", "#fff7ed"]
-    : ["#f97316", "#fbbf24", "#fed7aa", "#fff7ed", "#c084fc", "#fde68a"];
+    ? ["#ef4444", "#fca5a5", "#fee2e2", ...(bannerPalettes[bannerId] || bannerPalettes.aetheris).slice(0, 3)]
+    : (bannerPalettes[bannerId] || bannerPalettes.aetheris);
   const particles = [];
   for (let i = 0; i < 80; i++) {
     const angle = Math.random() * Math.PI * 2;
@@ -3943,7 +4101,7 @@ function initMissionSwipe() {
     const dx = touch.clientX - startX;
     const dy = touch.clientY - startY;
     if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy) * 1.25) return;
-    const pages = ["daily", "weekly", "lifetime", "mastery", "dupes", "titles", "codex"];
+    const pages = ["daily", "weekly", "lifetime", "mastery", "dupes", "titles", "codex", "sets", "companions"];
     const idx = pages.indexOf(activeMissionPage);
     const next = Math.max(0, Math.min(pages.length - 1, idx + (dx < 0 ? 1 : -1)));
     switchMissionPage(pages[next]);
@@ -3977,6 +4135,7 @@ updateFilterButtons();
 updateInvBadge();
 updateShardWallet();
 updateCurrency();
+renderRitualPanel();
 initBannerSwipe();
 initAppPageSwipe();
 initMissionSwipe();
