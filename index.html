@@ -391,22 +391,6 @@ h1 {
 .currency-gem { font-size: 1rem; filter: drop-shadow(0 0 6px rgba(201,168,76,.5)); }
 .pulls-left { color: #777; font-size: .8rem; letter-spacing: .2em; }
 .pulls-left span { color: var(--text-hi); font-size: .95rem; font-weight: 600; }
-.shard-wallet {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
-  margin: 0 0 12px;
-}
-.shard-chip {
-  padding: 7px 5px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--panel);
-  font: .62rem "Cormorant Garamond", serif;
-  text-align: center;
-  letter-spacing: .04em;
-}
-.shard-chip strong { display: block; margin-top: 2px; color: var(--text-hi); font: 700 .86rem "Cinzel", serif; }
 .currency-edit { display: flex; gap: 8px; margin-bottom: 22px; }
 .currency-edit input {
   flex: 1;
@@ -546,7 +530,6 @@ h1 {
 .pity-bar-fill.clockwork { background: linear-gradient(90deg, #4b2e16, #d6a35b, #fde68a); }
 .pity-bar-fill.warn { animation: pityPulse 1.2s ease-in-out infinite; box-shadow: 0 0 10px rgba(249,115,22,.6); }
 .pity-bar-fill.danger {
-  background: linear-gradient(90deg, #f97316, #fbbf24) !important;
   animation: pityPulse .6s ease-in-out infinite;
   box-shadow: 0 0 14px rgba(249,115,22,.8);
 }
@@ -1328,7 +1311,6 @@ h1 {
       <span class="currency-gem">💎</span>
       <span class="pulls-left">Pulls: <span id="pulls-left">100</span></span>
     </div>
-    <div class="shard-wallet" id="shard-wallet"></div>
     <div class="currency-edit">
       <input type="number" id="add-amount" min="1" max="9999" placeholder="Add pulls…">
       <button class="btn btn-add" onclick="addPulls()">+ Add</button>
@@ -1348,7 +1330,6 @@ h1 {
       <button class="btn btn-inv" onclick="openInv()">⬡ Collection <span class="inv-badge" id="inv-badge">0</span></button>
       <button class="btn btn-forge" onclick="openShardForge()">⬡ Shard Forge</button>
       <button class="btn btn-info" onclick="openBannerInfo()">ⓘ Banner Details</button>
-      <button class="btn" onclick="enableSound()">🔊 Enable Sound</button>
       <button class="btn btn-summary" onclick="openProgress()">◎ Progress</button>
       <div class="btn-row">
         <button class="btn btn-summary" onclick="openSummary()">◈ Summary</button>
@@ -1676,6 +1657,7 @@ let activeBanner = 0;
 let activeTab = "collection";
 let activeInvBannerFilter = "all";
 let lastResults = [];
+let lastRollWasPity = false;
 let pitySoundedAtByBanner = makeBannerState(-1);
 let audioContext = null;
 let audioUnlocked = false;
@@ -2024,7 +2006,7 @@ function openItemDetail(name) {
         <span class="detail-chip">${bannerLabel(item.banner)}</span>
         <span class="detail-chip">${discovered ? `Owned ×${owned.count}` : "Locked"}</span>
       </div>
-      <div class="detail-flavor">${itemFlavor(item, discovered)}</div>
+      ${discovered ? `<div class="detail-flavor">${itemFlavor(item, discovered)}</div>` : ""}
     </div>`;
   $("detail-overlay").classList.add("open");
   $("detail-panel").classList.add("open");
@@ -2518,13 +2500,15 @@ function renderSummary() {
 }
 
 function roll() {
+  lastRollWasPity = false;
   const bannerId = getActiveBannerId();
   const nextPity = getPity(bannerId) + 1;
   setPity(nextPity, bannerId);
   if (nextPity >= PITY_THRESHOLD) {
     SFX.pityFanfare();
     setPity(0, bannerId);
-    return "legendary";
+    lastRollWasPity = true;
+    return Math.random() < RATES.mythic ? "mythic" : "legendary";
   }
   if (nextPity === Math.floor(PITY_THRESHOLD * .8) && nextPity !== pitySoundedAtByBanner[bannerId]) {
     pitySoundedAtByBanner[bannerId] = nextPity;
@@ -2552,9 +2536,16 @@ function pickItem(rarity) {
 
 function rollTenPullResults() {
   const results = [];
-  for (let i = 0; i < 10; i++) results.push({ rarity: roll(), item: null });
-  if (getActiveBanner().guaranteeTen === "legendary" && !results.some(result => RARITY_ORDER[result.rarity] >= RARITY_ORDER.legendary)) {
-    results[Math.floor(Math.random() * results.length)].rarity = "legendary";
+  for (let i = 0; i < 10; i++) {
+    const rarity = roll();
+    results.push({ rarity, item: null, fromPity: lastRollWasPity });
+  }
+  const hasNonPityHighRarity = results.some(result => RARITY_ORDER[result.rarity] >= RARITY_ORDER.legendary && !result.fromPity);
+  if (getActiveBanner().guaranteeTen === "legendary" && !hasNonPityHighRarity) {
+    const eligible = results.map((_, i) => i).filter(i => !results[i].fromPity);
+    const targetIdx = eligible.length ? eligible[Math.floor(Math.random() * eligible.length)] : Math.floor(Math.random() * results.length);
+    results[targetIdx].rarity = "legendary";
+    results[targetIdx].fromGuarantee = true;
   }
   results.forEach(result => { result.item = pickItem(result.rarity); });
   return results;
@@ -3183,15 +3174,6 @@ function openPullViewer(result) {
 
 function closePullViewer() {
   $("pull-view-overlay").classList.remove("open");
-}
-
-function enableSound() {
-  unlockAudio();
-  const c = audioCtx();
-  if (c && c.resume) c.resume().catch(() => {});
-  audioUnlocked = true;
-  tone(880, "sine", .08, 0, .08);
-  tone(1175, "sine", .06, .08, .12);
 }
 
 function initAudioUnlock() {
